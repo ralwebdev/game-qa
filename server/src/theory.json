@@ -1,0 +1,120 @@
+[
+  {
+    "id": "t1",
+    "tag": "concept",
+    "title": "What is Software Testing & Why Teams Test",
+    "summary": "The disciplined process of evaluating software to uncover discrepancies and mitigate release risk.",
+    "meaning": "Testing is empirical investigation conducted to provide stakeholders with objective information about product quality and behavioral risks.",
+    "importance": "Without rigorous testing, fatal crashes, security vulnerabilities, or broken game economies reach real players, damaging studio reputation.",
+    "example": "In a multiplayer shooter, QA validates that collision geometry stops players from walking through mountain walls to gain an unfair advantage.",
+    "action": "Observe games you play: notice subtle edge conditions like pausing right as a dialogue trigger starts."
+  },
+  {
+    "id": "t2",
+    "tag": "concept",
+    "title": "QA vs. Testing",
+    "summary": "Process-oriented quality assurance vs. execution-oriented defect identification.",
+    "meaning": "QA focuses on standards, processes, and continuous improvement to prevent defects from being injected into the pipeline. Testing is the tactical execution of the product to find existing defects.",
+    "importance": "Having testing without QA means you continually fight fires; having QA without testing means you never empirically inspect the software.",
+    "example": "QA establishes coding guidelines and automated build validation. Testing executes a 2-hour stress test on Android builds.",
+    "action": "Evaluate your own workflow: do you check requirements before starting, or solely inspect after writing code?"
+  },
+  {
+    "id": "t3",
+    "tag": "concept",
+    "title": "Error, Defect (Bug), and Failure",
+    "summary": "The fundamental chain of human mistake, code flaw, and observable runtime breakdown.",
+    "meaning": "An Error is a human mistake made by a programmer or designer. A Defect (bug) is the flaw remaining in the software artifact. A Failure is the unintended event experienced when the flawed code executes.",
+    "importance": "Distinguishing these prevents blaming players for unexpected behaviors and helps developers locate root causes quickly.",
+    "example": "Error: Dev writes `if (hp = 0)` instead of `==`. Defect: Assignment replaces comparison. Failure: Player immediately dies upon taking 1 point of damage.",
+    "action": "When encountering an anomaly, trace backwards from the symptom (failure) to where logic might have slipped."
+  },
+  {
+    "id": "t4",
+    "tag": "concept",
+    "title": "Verification vs. Validation",
+    "summary": "Building the product right (verification) vs. building the right product (validation).",
+    "meaning": "Verification asks: 'Did we build the game according to specifications?'. Validation asks: 'Does the game satisfy the real player's expectations and needs?'.",
+    "importance": "A game can pass 100% of specification checks (Verification) while still feeling confusing or unpleasant to play (Validation).",
+    "example": "Verification: Jumping velocity exactly matches the 12.5 m/s spec. Validation: Playtesters report that jumping feels sluggish and floats unrealistically.",
+    "action": "When testing a feature, first check the design doc, then step back and ask: 'Does this actually feel satisfying?'."
+  },
+  {
+    "id": "t5",
+    "tag": "technique",
+    "title": "Equivalence Partitioning & Boundary Value Analysis",
+    "summary": "Dividing input domains into valid/invalid subsets and testing their exact edges.",
+    "meaning": "Equivalence groups assume values in the same partition produce identical logic. Boundary testing validates the minimum and maximum edges where comparisons flip.",
+    "importance": "You cannot test billions of input combinations. Boundary analysis provides maximum defect-finding power in minimal time.",
+    "example": "Level limits 1-50. Equivalence sets: Invalid negative, Valid (1-50), Invalid (>50). Boundaries tested: 0, 1, 50, 51.",
+    "action": "List the boundaries for a high-score leaderboard displaying ranks 1 through 100."
+  },
+  {
+    "id": "t6",
+    "tag": "technique",
+    "title": "Exploratory Testing & Charters",
+    "summary": "Simultaneous learning, test design, and test execution guided by a clear mission charter.",
+    "meaning": "Unlike rigid scripted checklists, exploratory testing gives skilled testers freedom to investigate anomalies using structured time-boxed charters.",
+    "importance": "Scripted tests only find what was anticipated. Exploratory testing uncovers unexpected emergent behaviors in complex games.",
+    "example": "Charter: 'Explore character inventory switching during rapid network latency to discover item duplication defects within 45 minutes.'",
+    "action": "Pick a mobile game menu and explore it for 15 minutes with the express mission of interrupting animations."
+  },
+  {
+    "id": "t7",
+    "tag": "technique",
+    "title": "State-Transition & Decision Tables",
+    "summary": "Mapping out game entity states (Alive, Stunned, Dead) and input condition combinations.",
+    "meaning": "A state machine ensures entities only move between legal states. Decision tables map complex multi-variable business rules into a grid.",
+    "example": "Can a player cast a spell while 'Stunned'? State table shows Stunned -> Cast is an illegal transition.",
+    "action": "Draw a simple state transition diagram for an in-game shopping cart: Empty -> Populated -> Checkout -> Completed."
+  },
+  {
+    "id": "t8",
+    "tag": "technique",
+    "title": "Risk-Based Testing",
+    "summary": "Prioritizing testing effort based on defect likelihood and severity of impact.",
+    "meaning": "When release deadlines approach, QA focuses on high-risk features (payment transactions, core progression saves) over low-risk cosmetics.",
+    "example": "Focusing 80% of test cycles on in-app purchase receipts rather than the credit roll typography.",
+    "action": "Rank 3 features by risk: In-app store, Options volume slider, and Single-player save loading."
+  },
+  {
+    "id": "t9",
+    "tag": "lifecycle",
+    "title": "Severity vs. Priority",
+    "summary": "Technical impact on the system vs. urgency of business scheduling.",
+    "meaning": "Severity is determined primarily by QA based on how badly the product is impaired. Priority is set by product leadership based on release readiness and user impact.",
+    "importance": "Conflating severity and priority causes developers to patch minor edge-case crashes instead of release-blocking visual typos.",
+    "example": "A spelling typo on the startup title screen: Low Severity, High Priority (damages immediate first impression).",
+    "action": "Practice classifying real bugs into 2x2 grids: High/Low Severity vs. High/Low Priority."
+  },
+  {
+    "id": "t10",
+    "tag": "lifecycle",
+    "title": "Evidence & Privacy-Safe Reporting",
+    "summary": "Attaching logs, screenshots, and videos without leaking sensitive user identifiers.",
+    "meaning": "High-quality bug reports require concrete evidence (logs, timestamps). Testers must ensure no private account tokens, emails, or PII are exposed in screenshots.",
+    "importance": "Protects privacy compliance while providing developers visual proof of reproduction steps.",
+    "example": "Blurring out test player email addresses or payment card tokens in QA video attachments.",
+    "action": "Inspect bug reports to confirm screenshots only display test accounts in sandbox environments."
+  },
+  {
+    "id": "t11",
+    "tag": "lifecycle",
+    "title": "Retest, Regression, Smoke, and Sanity",
+    "summary": "Understanding the four key execution cycles in agile and release testing.",
+    "meaning": "Smoke test: quick broad check that build runs. Sanity test: focused check that specific subsystem works. Retest: confirming a bug is resolved. Regression: confirming nothing else broke.",
+    "importance": "Executing full test suites for every tiny hotfix is impossible; distinct test passes optimize QA bandwidth.",
+    "example": "Smoke test: Launch game, reach main menu, start tutorial. Takes 5 minutes.",
+    "action": "Design a 3-step smoke test for your favorite phone application."
+  },
+  {
+    "id": "t12",
+    "tag": "lifecycle",
+    "title": "Test Execution Statuses: Pass, Fail, Blocked, Not Run",
+    "summary": "Standard reporting statuses used in studio test management tools.",
+    "meaning": "Pass: behavior matches specification. Fail: defect identified. Blocked: an external bug prevents executing the step. Not Run: test pending execution.",
+    "importance": "Clear statuses provide team leads with real-time visibility into actual test velocity and bottlenecks.",
+    "example": "If a door cannot be opened due to a missing key, any test case evaluating the dungeon behind it is marked 'Blocked'.",
+    "action": "Never mark a test 'Pass' if you skipped any precondition or prerequisite step."
+  }
+]

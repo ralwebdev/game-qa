@@ -1,0 +1,74 @@
+[
+  {
+    "id": 1,
+    "title": "Foundations of Game QA",
+    "summary": "Quality assurance vs. testing, tester duties, defect vs. failure, and professional ethics.",
+    "explanation": "Quality Assurance (QA) defines the proactive processes that prevent defects, while Software Testing executes the game to discover defects. Testers do not 'break' games; they expose pre-existing failures to safeguard player trust and experience.",
+    "example": "Example: If a character falls through the terrain during an inventory toggle, the root cause is an error in code or bounding geometry. The defect exists in the build; the failure occurs when the character plunges into empty space.",
+    "activity": "Try this: Note three differences between checking if an attack animation runs vs. evaluating whether the combat feels responsive and satisfying.",
+    "quiz": {
+      "q": "What is the key difference between a defect and a failure?",
+      "a": "A defect (bug) is an imperfection or flaw in code/assets. A failure is the observable deviation in game behavior when that flawed code executes."
+    }
+  },
+  {
+    "id": 2,
+    "title": "Test Design & Technique",
+    "summary": "Objectives, preconditions, boundary analysis, equivalence partitioning, and risk.",
+    "explanation": "Structured test design prevents random guessing. Equivalence partitioning divides inputs into groups treated similarly (e.g., valid inventory quantities 1 to 99). Boundary value analysis focuses on edges (0, 1, 99, 100), where game loops most frequently fail.",
+    "example": "Example: Testing an ammo clip of 30 rounds. Test boundaries: 0 (empty), 1 (minimum), 30 (full capacity), and 31 (overflow attempt via reload prompt).",
+    "activity": "Try this: Create test boundaries for a player character's age selector configured to accept ages 13 to 99.",
+    "quiz": {
+      "q": "Why do boundaries fail more often than interior values?",
+      "a": "Programmers frequently make off-by-one comparison errors (e.g., using '<' instead of '<=', or array index offsets starting at 0)."
+    }
+  },
+  {
+    "id": 3,
+    "title": "Clear Bug Reports",
+    "summary": "Reproduction steps, expected vs. actual behavior, severity, priority, and evidence.",
+    "explanation": "A high-quality bug report allows any developer to replicate the issue on their first attempt without asking clarification questions. Severity defines how severely the flaw harms game mechanics; Priority indicates how urgently management needs it patched.",
+    "example": "Example Title: '[Shop UI] Tapping Purchase button 5 times rapidly charges gold multiple times for single potion'.",
+    "activity": "Try this: Review a vague bug report like 'Sound is broken' and rewrite it into a precise, actionable summary with steps.",
+    "quiz": {
+      "q": "Can a bug have high severity but low priority?",
+      "a": "Yes. An instant crash occurring exclusively when an obscure legacy controller is unplugged during the end-game credits has Critical Severity (crash) but Low Priority (unlikely edge case close to deadline)."
+    }
+  },
+  {
+    "id": 4,
+    "title": "Game Feature Testing",
+    "summary": "Controls, rules, physics, scoring, UI, save/load cycles, and audio cues.",
+    "explanation": "Games contain non-linear, stateful systems. Feature testing checks both discrete logic (scoring arithmetic, inventory persistence) and sensory feedback (sound effects syncing with sword strikes, menu navigation).",
+    "example": "Example: Verifying pause states. If an explosion initiates when Pause is clicked, physics particles, hitboxes, and timer sounds must completely halt until Resume is clicked.",
+    "activity": "Try this: Outline 4 test conditions for saving a game mid-combat, closing the app, and relaunching.",
+    "quiz": {
+      "q": "What makes game save/load testing uniquely challenging?",
+      "a": "Save data must serialize vast dynamic states (coordinates, AI aggro, quest progression, physics momentum) accurately across software updates."
+    }
+  },
+  {
+    "id": 5,
+    "title": "Mobile & Platform Coverage",
+    "summary": "Device matrices, OS fragmentation, interruptions, thermal throttling, and screen ratios.",
+    "explanation": "Mobile titles operate in hostile device environments. Testing must account for incoming phone calls, low battery notifications, aspect ratio cutoffs (notches, hole punches), and backgrounding.",
+    "example": "Example: Receiving a phone call during an active multiplayer match. Does the game reconnect smoothly or freeze the entire device UI?",
+    "activity": "Try this: Test an app while transitioning your phone from Wi-Fi to airplane mode and back.",
+    "quiz": {
+      "q": "What is an interruption test?",
+      "a": "Testing how gracefully the game suspends and restores state when interrupted by device events like calls, SMS overlays, alarms, or OS prompts."
+    }
+  },
+  {
+    "id": 6,
+    "title": "Retesting & Release Readiness",
+    "summary": "Regression testing, smoke runs, sanity verification, release notes, and risk sign-off.",
+    "explanation": "Retesting verifies that a specific defect has been resolved. Regression testing verifies that the developer's fix did not inadvertently break other existing features. Smoke testing provides a quick health check before committing builds to wider QA.",
+    "example": "Example: Fixing a weapon reload bug could accidentally alter all animation timing. QA retests reload (Retest) and conducts a quick run of combat and mobility (Regression).",
+    "activity": "Try this: Write a 5-item smoke test checklist for a game build before it is handed to full QA.",
+    "quiz": {
+      "q": "Why is regression testing essential after every bug fix?",
+      "a": "Game code is highly interdependent; altering physics, memory, or UI logic in one subsystem frequently causes unintended side effects elsewhere."
+    }
+  }
+]
