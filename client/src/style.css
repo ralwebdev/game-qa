@@ -286,9 +286,10 @@ code, pre {
 
 .user-profile-text {
   display: none;
+  flex-direction: column;
 }
 
-@media (min-width: 600px) {
+@media (min-width: 640px) {
   .user-profile-text {
     display: flex;
   }
@@ -1064,7 +1065,7 @@ select.form-control {
   align-items: center;
   gap: 8px;
   user-select: none;
-  min-height: 38px;
+  min-height: 44px;
 }
 
 .expandable-details summary::-webkit-details-marker {
@@ -1548,6 +1549,12 @@ select.form-control {
 .font-mono { font-family: var(--font-mono); }
 .w-full { width: 100%; }
 .text-center { text-align: center; }
+
+@media (max-width: 640px) {
+  .btn-mobile-full {
+    width: 100% !important;
+  }
+}
 
 /* ==========================================================================
    PRINT STYLES

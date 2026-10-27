@@ -55,7 +55,7 @@ export default function Header({ user, currentTab, onSelectTab, onLogout }) {
             <div className="user-avatar">
               {user.role === 'admin' ? <ShieldCheck size={16} /> : (user.name?.[0] || 'L').toUpperCase()}
             </div>
-            <div className="flex flex-col user-profile-text">
+            <div className="user-profile-text">
               <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f8fafc', lineHeight: 1.1 }}>
                 {user.role === 'admin' ? 'Academy Admin' : user.name}
               </span>
