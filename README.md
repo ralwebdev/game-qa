@@ -25,7 +25,7 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5173. Sign in with the admin email/password from `.env` to enter the admin panel; register new accounts to use the learner panel.
+Open http://localhost:5173 for learner sign-in and registration. Open http://localhost:5173/admin for administrator sign-in, using the admin email/password from `.env`.
 
 Or after installing both subprojects, from repository root run `npm install` and `npm run dev`.
 
@@ -47,7 +47,7 @@ If frontend and backend are hosted on different origins, configure cookies and C
 
 ## Routes
 
-- `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/logout`, `GET/PATCH /api/auth/me`
+- `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/admin/login`, `POST /api/auth/logout`, `GET/PATCH /api/auth/me`
 - `GET /api/dashboard`, `GET /api/modules`, `POST /api/modules/:id/complete`, `GET /api/theory`
 - `GET/POST /api/bugs`, `PATCH/DELETE /api/bugs/:id`
 - `GET/POST /api/cases`, `PATCH/DELETE /api/cases/:id`
