@@ -57,7 +57,7 @@ export default function App() {
           <div className="brand-icon-wrapper" style={{ margin: '0 auto 16px', width: 48, height: 48 }}>
             <span style={{ fontSize: '1.4rem' }}>🎮</span>
           </div>
-          <h2 style={{ marginBottom: 6 }}>Game QA Academy</h2>
+          <h2 style={{ marginBottom: 6 }}>Scope GT</h2>
           <p className="text-muted text-sm">Initializing testing environment & verifying session…</p>
         </div>
       </div>

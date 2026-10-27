@@ -38,7 +38,7 @@ export default function CertificateView({ user, cert, bugs = 0, cases = 0 }) {
             <Award size={34} />
           </div>
 
-          <div className="cert-org">Game QA Academy — Testing Studio</div>
+          <div className="cert-org">Scope GT — Testing Studio</div>
           <h2 className="cert-title">Certificate of Course Completion</h2>
           <div className="cert-subtitle">Foundational Software Quality Assurance for Video Games</div>
 
@@ -74,7 +74,7 @@ export default function CertificateView({ user, cert, bugs = 0, cases = 0 }) {
           </div>
 
           <div className="cert-disclaimer">
-            Official completion record issued by Game QA Academy. Verifiable against canonical registry records. Not an accredited degree or ISTQB credential.
+            Official completion record issued by Scope GT. Verifiable against canonical registry records. Not an accredited degree or ISTQB credential.
           </div>
         </div>
       </div>

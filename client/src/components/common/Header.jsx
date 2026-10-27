@@ -29,7 +29,7 @@ export default function Header({ user, currentTab, onSelectTab, onLogout }) {
           <Gamepad2 size={20} />
         </div>
         <div className="brand-text">
-          Game QA <span>Academy</span>
+          Scope <span>GT</span>
         </div>
       </div>
 

@@ -45,7 +45,7 @@ export default function LearnerStudio({ tab, user, setUser, go, run, setNotice }
         <div className="brand-icon-wrapper" style={{ margin: '0 auto 16px' }}>
           <span style={{ fontSize: '1.2rem' }}>🎮</span>
         </div>
-        <h3>Loading Game QA Academy…</h3>
+        <h3>Loading Scope GT…</h3>
         <p className="text-muted text-sm">Synchronizing your curriculum records and testing portfolio.</p>
       </div>
     );

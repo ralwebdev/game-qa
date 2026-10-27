@@ -176,7 +176,7 @@ export default function MoreTab({ user, setUser, dash, bugs, cases, feedback, go
           />
 
           <button type="submit" className="btn primary">
-            <Send size={15} /> Submit Academy Feedback
+            <Send size={15} /> Submit Scope GT Feedback
           </button>
         </form>
 

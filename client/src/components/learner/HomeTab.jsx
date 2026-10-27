@@ -35,7 +35,7 @@ export default function HomeTab({ user, dash, modules, bugs, cases, go, run, set
       {/* Hero Welcome Card */}
       <div className="card hero">
         <div className="flex justify-between items-center mb-2">
-          <span className="pill-role">{user?.learnerRole || 'Game QA Apprentice'}</span>
+          <span className="pill-role">{user?.learnerRole || 'Scope GT Apprentice'}</span>
           <span className="text-dim text-sm font-mono">Curriculum v2.4</span>
         </div>
 

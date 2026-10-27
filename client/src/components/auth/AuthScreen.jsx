@@ -56,7 +56,7 @@ export default function AuthScreen({ onAuth, onError }) {
               <Gamepad2 size={22} />
             </div>
             <div>
-              Game QA <span>Academy</span>
+              Scope <span>GT</span>
             </div>
           </div>
           {isAdminPath ? (
