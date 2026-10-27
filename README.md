@@ -33,6 +33,30 @@ Or after installing both subprojects, from repository root run `npm install` and
 
 Use environment variables for secrets, HTTPS behind a reverse proxy, and MongoDB credentials restricted to this database. Set `NODE_ENV=production` and configure `CLIENT_ORIGIN` for your deployed hostname. Build the React client with `npm run build --prefix client`, then start the Express server with `npm start --prefix server`. The server serves the built client automatically in production.
 
+### AWS Lightsail redeploy
+
+The repository includes `deploy.sh` for the usual steps after `git pull`: install the exact locked dependencies, build the client, and restart the application. Give it execute permission once, then run it after each pull:
+
+```bash
+chmod +x deploy.sh
+git pull
+./deploy.sh
+```
+
+The script uses PM2 when it is installed. Its default app name is `game-qa-academy`; override it if your existing PM2 process has a different name:
+
+```bash
+PM2_APP_NAME=my-existing-app ./deploy.sh
+```
+
+If the app is managed by systemd instead, provide the service name:
+
+```bash
+SYSTEMD_SERVICE=game-qa-academy ./deploy.sh
+```
+
+Use `./deploy.sh --no-restart` to only install and build. The optional `--seed` flag runs `npm run seed --prefix server`; use it only when you deliberately want to apply the seed data.
+
 If frontend and backend are hosted on different origins, configure cookies and CSRF defense appropriately before production deployment; the supplied application assumes a same-origin reverse-proxy setup.
 
 ## Core roles and features
