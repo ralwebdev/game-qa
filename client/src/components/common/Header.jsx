@@ -16,7 +16,7 @@ export const NAV_ITEMS = [
   { key: 'home', label: 'Home', icon: Home },
   { key: 'course', label: 'Course', icon: BookOpen },
   { key: 'theory', label: 'Theory', icon: Search },
-  { key: 'practice', label: 'Practice Lab', icon: FlaskConical },
+  { key: 'practice', label: 'Practice', icon: FlaskConical },
   { key: 'portfolio', label: 'Portfolio', icon: Folder },
   { key: 'more', label: 'More', icon: MoreHorizontal }
 ];
@@ -28,7 +28,7 @@ export default function Header({ user, currentTab, onSelectTab, onLogout }) {
         <div className="brand-icon-wrapper">
           <Gamepad2 size={20} />
         </div>
-        <div>
+        <div className="brand-text">
           Game QA <span>Academy</span>
         </div>
       </div>
@@ -50,12 +50,12 @@ export default function Header({ user, currentTab, onSelectTab, onLogout }) {
       )}
 
       {user && (
-        <div className="flex items-center gap-3 no-print">
+        <div className="flex items-center gap-2 no-print header-user-actions">
           <div className="user-profile-badge">
             <div className="user-avatar">
               {user.role === 'admin' ? <ShieldCheck size={16} /> : (user.name?.[0] || 'L').toUpperCase()}
             </div>
-            <div className="flex flex-col">
+            <div className="flex flex-col user-profile-text">
               <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#f8fafc', lineHeight: 1.1 }}>
                 {user.role === 'admin' ? 'Academy Admin' : user.name}
               </span>
