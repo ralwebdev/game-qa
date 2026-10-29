@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { 
   User, 
+  Smartphone,
   Award, 
   MessageSquare, 
   Download, 
@@ -11,6 +12,7 @@ import {
   Sparkles 
 } from 'lucide-react';
 import FormField from '../common/FormField';
+import DeviceFields, { blankDevice, legacyDevice } from './DeviceFields';
 import CertificateView from './CertificateView';
 import { patch, post } from '../../services/api';
 
@@ -19,6 +21,7 @@ export default function MoreTab({ user, setUser, dash, bugs, cases, feedback, go
     name: user?.name || '',
     learnerRole: user?.learnerRole || 'Student'
   });
+  const [devices, setDevices] = useState(() => user?.devices?.length ? user.devices : user?.device && user?.os ? [legacyDevice(user.device, user.os)] : [blankDevice()]);
   const [feedbackForm, setFeedbackForm] = useState({
     rating: 5,
     message: ''
@@ -29,6 +32,16 @@ export default function MoreTab({ user, setUser, dash, bugs, cases, feedback, go
       const res = await patch('/auth/me', profile);
       setUser(res.user);
       setNotice('Profile details updated successfully');
+    });
+  };
+
+  const handleSaveDevice = (e) => {
+    e.preventDefault();
+    run(async () => {
+      const res = await patch('/auth/me', { devices });
+      setUser(res.user);
+      setDevices(res.user.devices);
+      setNotice('Device details saved for future defect reports');
     });
   };
 
@@ -107,6 +120,27 @@ export default function MoreTab({ user, setUser, dash, bugs, cases, feedback, go
         <button type="button" className="btn primary mt-2" onClick={handleSaveProfile}>
           Save Profile Changes
         </button>
+      </div>
+
+      <div className="card">
+        <div className="card-header-row">
+          <div className="flex items-center gap-2">
+            <Smartphone size={20} style={{ color: '#06b6d4' }} />
+            <h2 style={{ margin: 0 }}>Device Details</h2>
+          </div>
+        </div>
+        <p className="text-muted text-sm">Save devices here to select them in new defect reports.</p>
+        <form onSubmit={handleSaveDevice}>
+          {devices.map((device, index) => <div key={index} className="mb-3" style={{ border: '1px solid var(--border-subtle)', padding: 12, borderRadius: 'var(--radius-sm)' }}>
+            <h4>Device {index + 1}</h4>
+            <DeviceFields prefix={`profile-device-${index}`} device={device} onChange={(name, value) => setDevices(current => current.map((d, i) => i === index ? { ...d, [name]: value } : d))} />
+            {devices.length > 1 && <button type="button" className="btn sm" onClick={() => setDevices(current => current.filter((_, i) => i !== index))}>Remove device</button>}
+          </div>)}
+          <div className="flex items-center gap-2 flex-wrap">
+            {devices.length < 20 && <button type="button" className="btn" onClick={() => setDevices(current => [...current, blankDevice()])}>Add another device</button>}
+            <button type="submit" className="btn primary">Save Device Details</button>
+          </div>
+        </form>
       </div>
 
       {/* Certificate Section */}

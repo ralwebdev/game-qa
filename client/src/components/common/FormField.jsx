@@ -3,6 +3,7 @@ import React from 'react';
 export default function FormField({
   label,
   name,
+  id = name,
   value,
   onChange,
   required = false,
@@ -19,7 +20,7 @@ export default function FormField({
   return (
     <div className="form-group">
       {label && (
-        <label className="form-label" htmlFor={name}>
+        <label className="form-label" htmlFor={id}>
           {label}
           {required && <span className="required-star">*</span>}
         </label>
@@ -27,7 +28,7 @@ export default function FormField({
 
       {choices ? (
         <select
-          id={name}
+          id={id}
           className="form-control"
           value={value ?? ''}
           required={required}
@@ -42,7 +43,7 @@ export default function FormField({
         </select>
       ) : kind === 'textarea' ? (
         <textarea
-          id={name}
+          id={id}
           className="form-control"
           value={value ?? ''}
           required={required}
@@ -52,7 +53,7 @@ export default function FormField({
         />
       ) : (
         <input
-          id={name}
+          id={id}
           className="form-control"
           type={kind}
           value={value ?? ''}

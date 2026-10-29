@@ -34,11 +34,14 @@ export default function PortfolioTab({ user, bugs, cases, feedback, run, setNoti
     });
   };
 
-  const handleUpdateBug = (id, data) => {
-    run(async () => {
+  const handleUpdateBug = async (id, data) => {
+    let saved = false;
+    await run(async () => {
       await patch(`/bugs/${id}`, data);
       setNotice('Defect report updated successfully');
+      saved = true;
     });
+    return saved;
   };
 
   const handleDeleteCase = (id) => {
@@ -96,6 +99,7 @@ export default function PortfolioTab({ user, bugs, cases, feedback, run, setNoti
                 key={b._id}
                 item={b}
                 kind="bugs"
+                savedDevices={user.devices || []}
                 onDelete={() => handleDeleteBug(b._id)}
                 onSave={(data) => handleUpdateBug(b._id, data)}
               />

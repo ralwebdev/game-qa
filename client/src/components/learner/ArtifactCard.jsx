@@ -13,7 +13,7 @@ import {
 import Badge from '../common/Badge';
 import ArtifactForm from './ArtifactForm';
 
-export default function ArtifactCard({ item, kind, onDelete, onSave }) {
+export default function ArtifactCard({ item, kind, onDelete, onSave, savedDevices = [] }) {
   const [isEditing, setIsEditing] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -105,10 +105,11 @@ export default function ArtifactCard({ item, kind, onDelete, onSave }) {
                 {item.description && (
                   <tr><td>Issue Description</td><td style={{ whiteSpace: 'pre-line' }}>{item.description}</td></tr>
                 )}
-                {item.os && (
+                {item.devices?.length > 0 && <tr><td>Tested devices</td><td>{item.devices.map((d, i) => <div key={i}>{[d.platform, d.device, d.os, d.cpu && `CPU: ${d.cpu}`, d.gpu && `GPU: ${d.gpu}`, d.graphics && `Graphics: ${d.graphics}`, d.result].filter(Boolean).join(' ? ')}</div>)}</td></tr>}
+                {item.os && !item.devices?.length && (
                   <tr><td>Operating System Version</td><td>{item.os}</td></tr>
                 )}
-                {item.appName && (
+                {(item.appName || item.build) && (
                   <tr>
                     <td>App / Build</td>
                     <td>{item.appName} {item.build ? `(${item.build})` : ''}</td>
@@ -216,10 +217,11 @@ export default function ArtifactCard({ item, kind, onDelete, onSave }) {
           <ArtifactForm
             kind={isBug ? 'bug' : 'case'}
             initial={item}
+            savedDevices={savedDevices}
             buttonText="Save Changes"
             onSave={async (values) => {
-              await onSave(values);
-              setIsEditing(false);
+              const saved = await onSave(values);
+              if (saved !== false) setIsEditing(false);
             }}
             onCancel={() => setIsEditing(false)}
           />

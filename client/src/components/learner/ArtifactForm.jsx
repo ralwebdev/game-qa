@@ -11,6 +11,7 @@ import {
   HelpCircle 
 } from 'lucide-react';
 import FormField from '../common/FormField';
+import DeviceFields, { blankDevice, legacyDevice } from './DeviceFields';
 
 export const BUG_DEFAULTS = {
   title: '',
@@ -41,8 +42,12 @@ export const CASE_DEFAULTS = {
   result: 'Not run'
 };
 
-export default function ArtifactForm({ kind = 'bug', initial, onSave, buttonText, onCancel, savedDevice }) {
-  const [form, setForm] = useState(initial || (kind === 'bug' ? { ...BUG_DEFAULTS, device: savedDevice?.device || '', os: savedDevice?.os || '' } : CASE_DEFAULTS));
+export default function ArtifactForm({ kind = 'bug', initial, onSave, buttonText, onCancel, savedDevices = [] }) {
+  const [form, setForm] = useState(() => {
+    if (kind !== 'bug') return initial || CASE_DEFAULTS;
+    const devices = initial?.devices?.length ? initial.devices : initial?.device ? [legacyDevice(initial.device, initial.os)] : savedDevices.length ? [{ ...blankDevice(), ...savedDevices[0], result: 'Not tested' }] : [blankDevice()];
+    return { ...BUG_DEFAULTS, ...initial, devices };
+  });
   const [busy, setBusy] = useState(false);
   const optionsWithCurrent = (options, current) => current && !options.includes(current) ? [current, ...options] : options;
 
@@ -56,7 +61,7 @@ export default function ArtifactForm({ kind = 'bug', initial, onSave, buttonText
     try {
       const saved = await onSave(form);
       if (!initial && saved !== false) {
-        setForm(kind === 'bug' ? { ...BUG_DEFAULTS, device: form.device, os: form.os } : CASE_DEFAULTS);
+        setForm(kind === 'bug' ? { ...BUG_DEFAULTS, devices: form.devices.map(d => ({ ...d, result: 'Not tested' })) } : CASE_DEFAULTS);
       }
     } finally {
       setBusy(false);
@@ -88,15 +93,29 @@ export default function ArtifactForm({ kind = 'bug', initial, onSave, buttonText
       {kind === 'bug' ? (
         <>
           <div className="mb-4">
-            <h4>Device Details</h4>
+            <h4>Game and Tested Devices</h4>
             <div className="form-grid-2">
-              <FormField label="Model Name and Number" name="device" placeholder="e.g. Redmi Note 12 Pro 5G" value={form.device} onChange={update} required />
-              <FormField label="Android Version" name="os" placeholder="e.g. 16" value={form.os} onChange={update} required />
+              <FormField label="Game / App Title" name="appName" placeholder="e.g. PlayzHub / Parking Sort" value={form.appName} onChange={update} />
+              <FormField label="Build / Version" name="build" placeholder="e.g. 1.2.0" value={form.build} onChange={update} />
             </div>
+            {form.devices.map((device, index) => <div key={index} className="mb-3" style={{ border: '1px solid var(--border-subtle)', padding: 12, borderRadius: 'var(--radius-sm)' }}>
+              <h4>Tested device {index + 1}</h4>
+              {savedDevices.length > 0 && <div className="form-group">
+                <label className="form-label" htmlFor={`saved-device-${index}`}>Use a saved device</label>
+                <select id={`saved-device-${index}`} className="form-control" value="" onChange={e => {
+                  if (e.target.value === '') return;
+                  const selected = savedDevices[Number(e.target.value)];
+                  setForm(prev => ({ ...prev, devices: prev.devices.map((d, i) => i === index ? { ...blankDevice(), ...selected, result: d.result || 'Not tested' } : d) }));
+                }}><option value="">Choose a saved device</option>{savedDevices.map((d, i) => <option key={i} value={i}>{d.device} ({d.platform || 'Android'}, {d.os})</option>)}</select>
+              </div>}
+              <DeviceFields prefix={`report-device-${index}`} device={device} showResult onChange={(name, value) => setForm(prev => ({ ...prev, devices: prev.devices.map((d, i) => i === index ? { ...d, [name]: value } : d) }))} />
+              {form.devices.length > 1 && <button type="button" className="btn sm" onClick={() => setForm(prev => ({ ...prev, devices: prev.devices.filter((_, i) => i !== index) }))}>Remove device</button>}
+            </div>)}
+            {form.devices.length < 20 && <button type="button" className="btn" onClick={() => setForm(prev => ({ ...prev, devices: [...prev.devices, blankDevice()] }))}>Add another tested device</button>}
           </div>
           <p className="text-dim text-sm">Enter one issue per report. Reports are identified in your portfolio.</p>
           <div className="form-grid-2">
-            <FormField label="Issue Category" name="category" choices={optionsWithCurrent(['UI/UX', 'Functional', 'Usability', 'Compatibility', 'Performance', 'Other'], form.category)} value={form.category} onChange={update} required />
+            <FormField label="Issue Category" name="category" choices={optionsWithCurrent(['UI/UX', 'Functional', 'Usability', 'Compatibility', 'Performance', 'Audio', 'Physics', 'Collision', 'Camera', 'Graphics / Visual', 'Crash / Freeze', 'Animation', 'Installation / Update', 'Save / Load', 'Other'], form.category)} value={form.category} onChange={update} required />
             <FormField label="Issue Title" name="title" placeholder="Briefly describe the issue" value={form.title} onChange={update} required />
           </div>
           <FormField label="Issue Description" name="description" kind="textarea" placeholder="Describe the issue and where it occurs" value={form.description} onChange={update} />
@@ -107,19 +126,27 @@ export default function ArtifactForm({ kind = 'bug', initial, onSave, buttonText
             <FormField label="Actual Result" name="actual" kind="textarea" placeholder="What actually happened?" value={form.actual} onChange={update} required />
           </div>
           <div className="form-grid-2">
-            <FormField label="Priority" name="priority" choices={optionsWithCurrent(['High', 'Medium', 'Low'], form.priority)} value={form.priority} onChange={update} required />
-            <FormField label="Severity" name="severity" choices={optionsWithCurrent(['High', 'Medium', 'Low'], form.severity)} value={form.severity} onChange={update} required />
+            <FormField helperText="How urgently should this be fixed?" label="Priority" name="priority" choices={optionsWithCurrent(['High', 'Medium', 'Low'], form.priority)} value={form.priority} onChange={update} required />
+            <FormField helperText="How serious is the effect on the game or user?" label="Severity" name="severity" choices={optionsWithCurrent(['High', 'Medium', 'Low'], form.severity)} value={form.severity} onChange={update} required />
           </div>
           <FormField label="Impact" name="impact" kind="textarea" placeholder="Describe how the issue affects users" value={form.impact} onChange={update} />
           <FormField label="Comments" name="notes" kind="textarea" placeholder="Additional observations" value={form.notes} onChange={update} />
           <FormField label="Attachment Link (Image or Video URL)" name="media" placeholder="https://..." value={form.media} onChange={update} />
+          <FormField label="Reproduction Frequency" name="frequency" placeholder="e.g. 2/5 attempts, or unknown" value={form.frequency} onChange={update} />
           <details className="expandable-details">
-            <summary>Additional environment details</summary>
-            <div className="form-grid-2 mt-3">
-              <FormField label="Game / App Title" name="appName" value={form.appName} onChange={update} />
-              <FormField label="Build / Version" name="build" value={form.build} onChange={update} />
-              <FormField label="Reproduction Frequency" name="frequency" choices={optionsWithCurrent(['Not provided', '100% (5/5 attempts)', 'Intermittent (~60%)', 'Once only'], form.frequency)} value={form.frequency} onChange={update} />
-            </div>
+            <summary>Review report before saving</summary>
+            <p><strong>Game:</strong> {form.appName || 'Not provided'} &nbsp; <strong>Build:</strong> {form.build || 'Not provided'}</p>
+            <p><strong>Devices:</strong> {form.devices.map(d => `${d.device || 'Unnamed device'} (${d.platform}, ${d.os || 'OS not provided'}): ${d.result || 'Not tested'}`).join('; ')}</p>
+            <p><strong>Issue:</strong> {form.title || 'Not provided'} ({form.category})</p>
+            <p><strong>Description:</strong> {form.description || 'Not provided'}</p>
+            <p><strong>Preconditions:</strong> {form.preconditions || 'Not provided'}</p>
+            <p style={{ whiteSpace: 'pre-line' }}><strong>Steps:</strong> {form.steps || 'Not provided'}</p>
+            <p><strong>Expected:</strong> {form.expected || 'Not provided'}</p>
+            <p><strong>Actual:</strong> {form.actual || 'Not provided'}</p>
+            <p><strong>Priority:</strong> {form.priority} &nbsp; <strong>Severity:</strong> {form.severity} &nbsp; <strong>Frequency:</strong> {form.frequency || 'Not provided'}</p>
+            <p><strong>Impact:</strong> {form.impact || 'Not provided'}</p>
+            <p><strong>Comments:</strong> {form.notes || 'Not provided'}</p>
+            <p><strong>Attachment:</strong> {form.media || 'Not provided'}</p>
           </details>
         </>
       ) : (

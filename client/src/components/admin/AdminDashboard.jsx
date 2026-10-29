@@ -362,7 +362,9 @@ export default function AdminDashboard({ run, setNotice }) {
                         <>
                           <p><strong>Category:</strong> {item.category}</p>
                           {item.description && <p><strong>Issue Description:</strong> {item.description}</p>}
-                          {item.device && <p><strong>Device:</strong> {item.device}</p>}
+                          {item.devices?.length ? <div><strong>Tested devices:</strong>{item.devices.map((d, i) => <p key={i}>{[d.platform, d.device, d.os, d.cpu && `CPU: ${d.cpu}`, d.gpu && `GPU: ${d.gpu}`, d.graphics && `Graphics: ${d.graphics}`, d.result].filter(Boolean).join(' ? ')}</p>)}</div> : item.device && <p><strong>Device:</strong> {item.device} {item.os}</p>}
+                          {item.appName && <p><strong>Game / App:</strong> {item.appName} {item.build && `(${item.build})`}</p>}
+                          {item.frequency && <p><strong>Frequency:</strong> {item.frequency}</p>}
                           {item.preconditions && <p><strong>Pre Conditions:</strong> {item.preconditions}</p>}
                           <p><strong>Steps:</strong></p>
                           <pre style={{ whiteSpace: 'pre-wrap', color: '#cbd5e1' }}>{item.steps}</pre>
