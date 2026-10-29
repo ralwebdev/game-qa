@@ -1263,6 +1263,24 @@ select.form-control {
    CERTIFICATE OF COMPLETION (Mobile-Scaled & Print Perfect)
    ========================================================================== */
 
+.certificate-artwork {
+  width: 100%;
+  margin: 20px 0;
+  overflow: hidden;
+  background: #f0f0f0;
+}
+
+.certificate-artwork canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.certificate-error {
+  padding: 16px;
+  color: #991b1b;
+}
+
 .cert-container {
   padding: 20px 14px;
   border-radius: var(--radius-lg);
@@ -1608,5 +1626,23 @@ select.form-control {
   .cert-badge-crest {
     background: #10b981 !important;
     color: #fff !important;
+  }
+}
+
+@page {
+  size: landscape;
+  margin: 0;
+}
+
+@media print {
+  body * { visibility: hidden; }
+  .card { overflow: visible !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+  .certificate-artwork, .certificate-artwork canvas { visibility: visible; }
+  .certificate-artwork {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    margin: 0;
   }
 }
