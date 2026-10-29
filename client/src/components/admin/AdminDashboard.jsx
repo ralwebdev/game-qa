@@ -360,11 +360,17 @@ export default function AdminDashboard({ run, setNotice }) {
                     <div className="p-3 mt-2" style={{ background: 'rgba(0, 0, 0, 0.3)', borderRadius: 'var(--radius-md)' }}>
                       {tab === 'bugs' ? (
                         <>
-                          <p><strong>Device:</strong> {item.device}</p>
+                          <p><strong>Category:</strong> {item.category}</p>
+                          {item.description && <p><strong>Issue Description:</strong> {item.description}</p>}
+                          {item.device && <p><strong>Device:</strong> {item.device}</p>}
+                          {item.preconditions && <p><strong>Pre Conditions:</strong> {item.preconditions}</p>}
                           <p><strong>Steps:</strong></p>
                           <pre style={{ whiteSpace: 'pre-wrap', color: '#cbd5e1' }}>{item.steps}</pre>
                           <p><strong>Expected:</strong> {item.expected}</p>
                           <p><strong>Actual:</strong> <span style={{ color: '#fb7185' }}>{item.actual}</span></p>
+                          {item.impact && <p><strong>Impact:</strong> {item.impact}</p>}
+                          {item.notes && <p><strong>Comments:</strong> {item.notes}</p>}
+                          {item.media && <p><strong>Attachment:</strong> {item.media}</p>}
                         </>
                       ) : (
                         <>

@@ -14,10 +14,11 @@ import FormField from '../common/FormField';
 
 export const BUG_DEFAULTS = {
   title: '',
-  category: 'Gameplay',
+  category: 'UI/UX',
+  description: '',
   device: '',
-  severity: 'Major',
-  priority: 'Medium (P2)',
+  severity: 'Medium',
+  priority: 'Medium',
   steps: '',
   expected: '',
   actual: '',
@@ -40,9 +41,10 @@ export const CASE_DEFAULTS = {
   result: 'Not run'
 };
 
-export default function ArtifactForm({ kind = 'bug', initial, onSave, buttonText, onCancel }) {
-  const [form, setForm] = useState(initial || (kind === 'bug' ? BUG_DEFAULTS : CASE_DEFAULTS));
+export default function ArtifactForm({ kind = 'bug', initial, onSave, buttonText, onCancel, savedDevice }) {
+  const [form, setForm] = useState(initial || (kind === 'bug' ? { ...BUG_DEFAULTS, device: savedDevice?.device || '', os: savedDevice?.os || '' } : CASE_DEFAULTS));
   const [busy, setBusy] = useState(false);
+  const optionsWithCurrent = (options, current) => current && !options.includes(current) ? [current, ...options] : options;
 
   const update = (name, value) => {
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -52,9 +54,9 @@ export default function ArtifactForm({ kind = 'bug', initial, onSave, buttonText
     e.preventDefault();
     setBusy(true);
     try {
-      await onSave(form);
-      if (!initial) {
-        setForm(kind === 'bug' ? BUG_DEFAULTS : CASE_DEFAULTS);
+      const saved = await onSave(form);
+      if (!initial && saved !== false) {
+        setForm(kind === 'bug' ? { ...BUG_DEFAULTS, device: form.device, os: form.os } : CASE_DEFAULTS);
       }
     } finally {
       setBusy(false);
@@ -79,190 +81,46 @@ export default function ArtifactForm({ kind = 'bug', initial, onSave, buttonText
           </h2>
         </div>
         <span className={`badge ${kind === 'bug' ? 'badge-major' : 'badge-minor'}`}>
-          {kind === 'bug' ? 'Jira / Defect Standard' : 'Test Case Spec'}
+          {kind === 'bug' ? 'Defect Report' : 'Test Case Spec'}
         </span>
       </div>
 
       {kind === 'bug' ? (
         <>
-          <div className="callout-box example" style={{ marginBottom: 20 }}>
-            <div className="flex items-center gap-2 mb-1" style={{ fontWeight: 700 }}>
-              <Info size={16} />
-              <span>QA Standards Guide</span>
-            </div>
-            <span className="text-sm">
-              <strong>Severity</strong> indicates system failure severity (Blocker = stops testing/progress).{' '}
-              <strong>Priority</strong> determines fix urgency for production scheduling.
-            </span>
-          </div>
-
-          {/* Section 1: Core Issue Details */}
           <div className="mb-4">
-            <h4 style={{ color: '#cbd5e1', marginBottom: 12, borderBottom: '1px solid var(--border-subtle)', paddingBottom: 6 }}>
-              1. Issue Summary & Classification
-            </h4>
-            <FormField
-              label="Issue Title"
-              name="title"
-              placeholder="[Menu] [Settings] Pressing Back button resets audio sliders to zero"
-              value={form.title}
-              onChange={update}
-              required
-              helperText="Format: [Component] [Condition] Concise description of failure"
-            />
-
-            <div className="form-grid-3">
-              <FormField
-                label="Category"
-                name="category"
-                choices={['Gameplay', 'UI/Menu', 'Audio', 'Crash/Freeze', 'Graphics/Animation', 'Progression/Save']}
-                value={form.category}
-                onChange={update}
-                required
-              />
-              <FormField
-                label="Severity"
-                name="severity"
-                choices={['Blocker/Critical', 'Major', 'Minor', 'Trivial']}
-                value={form.severity}
-                onChange={update}
-                required
-              />
-              <FormField
-                label="Priority"
-                name="priority"
-                choices={['High (P1)', 'Medium (P2)', 'Low (P3)']}
-                value={form.priority}
-                onChange={update}
-                required
-              />
-            </div>
-          </div>
-
-          {/* Section 2: Environment */}
-          <div className="mb-4">
-            <h4 style={{ color: '#cbd5e1', marginBottom: 12, borderBottom: '1px solid var(--border-subtle)', paddingBottom: 6 }}>
-              2. Target Environment & Frequency
-            </h4>
-            <div className="form-grid-3">
-              <FormField
-                label="Device / Platform"
-                name="device"
-                placeholder="e.g. PC / Steam Deck / PS5 / iPad Pro"
-                value={form.device}
-                onChange={update}
-                required
-              />
-              <FormField
-                label="Game / App Title"
-                name="appName"
-                placeholder="e.g. Project Odyssey"
-                value={form.appName}
-                onChange={update}
-              />
-              <FormField
-                label="Build / Version"
-                name="build"
-                placeholder="e.g. v1.0.42-rc3"
-                value={form.build}
-                onChange={update}
-              />
-            </div>
-
+            <h4>Device Details</h4>
             <div className="form-grid-2">
-              <FormField
-                label="Operating System Version"
-                name="os"
-                placeholder="e.g. Windows 11 23H2 / iOS 17.5"
-                value={form.os}
-                onChange={update}
-              />
-              <FormField
-                label="Reproduction Frequency"
-                name="frequency"
-                choices={['Not provided', '100% (5/5 attempts)', 'Intermittent (~60%)', 'Once only']}
-                value={form.frequency}
-                onChange={update}
-              />
+              <FormField label="Model Name and Number" name="device" placeholder="e.g. Redmi Note 12 Pro 5G" value={form.device} onChange={update} required />
+              <FormField label="Android Version" name="os" placeholder="e.g. 16" value={form.os} onChange={update} required />
             </div>
           </div>
-
-          {/* Section 3: Reproduction Steps */}
-          <div className="mb-4">
-            <h4 style={{ color: '#cbd5e1', marginBottom: 12, borderBottom: '1px solid var(--border-subtle)', paddingBottom: 6 }}>
-              3. Steps to Reproduce & Observations
-            </h4>
-            <FormField
-              label="Preconditions"
-              name="preconditions"
-              placeholder="e.g. User is logged in with Level 5 profile, Audio master volume set to 50%"
-              value={form.preconditions}
-              onChange={update}
-            />
-
-            <FormField
-              label="Numbered Steps to Reproduce"
-              name="steps"
-              kind="textarea"
-              placeholder={`1. Launch build and load Campaign mode.\n2. Navigate to Options -> Audio.\n3. Adjust Master Volume to 80% and press Apply.\n4. Click Back button to return to Main Menu.`}
-              value={form.steps}
-              onChange={update}
-              required
-            />
-
-            <div className="form-grid-2">
-              <FormField
-                label="Expected Result"
-                name="expected"
-                kind="textarea"
-                placeholder="Audio settings should persist and volume should remain at 80%."
-                value={form.expected}
-                onChange={update}
-                required
-              />
-              <FormField
-                label="Actual Result"
-                name="actual"
-                kind="textarea"
-                placeholder="Volume slider jumps to 0% and in-game audio becomes completely muted."
-                value={form.actual}
-                onChange={update}
-                required
-              />
-            </div>
+          <p className="text-dim text-sm">Enter one issue per report. Reports are identified in your portfolio.</p>
+          <div className="form-grid-2">
+            <FormField label="Issue Category" name="category" choices={optionsWithCurrent(['UI/UX', 'Functional', 'Usability', 'Compatibility', 'Performance', 'Other'], form.category)} value={form.category} onChange={update} required />
+            <FormField label="Issue Title" name="title" placeholder="Briefly describe the issue" value={form.title} onChange={update} required />
           </div>
-
-          {/* Section 4: Evidence & Supplementary */}
-          <div className="mb-4">
-            <h4 style={{ color: '#cbd5e1', marginBottom: 12, borderBottom: '1px solid var(--border-subtle)', paddingBottom: 6 }}>
-              4. Evidence & Context
-            </h4>
-            <div className="form-grid-2">
-              <FormField
-                label="Player / User Impact"
-                name="impact"
-                placeholder="e.g. Disorients players, breaks immersion during prologue cutscene"
-                value={form.impact}
-                onChange={update}
-              />
-              <FormField
-                label="Media Reference / URL"
-                name="media"
-                placeholder="e.g. https://youtu.be/... or screenshot_01.png"
-                value={form.media}
-                onChange={update}
-              />
-            </div>
-
-            <FormField
-              label="Internal Notes / Logs"
-              name="notes"
-              kind="textarea"
-              placeholder="Console output or callstack logs observed during reproduction..."
-              value={form.notes}
-              onChange={update}
-            />
+          <FormField label="Issue Description" name="description" kind="textarea" placeholder="Describe the issue and where it occurs" value={form.description} onChange={update} />
+          <FormField label="Pre Conditions" name="preconditions" kind="textarea" placeholder="Describe the conditions needed before testing" value={form.preconditions} onChange={update} />
+          <FormField label="Steps to Replicate" name="steps" kind="textarea" placeholder={'1. Launch the game.\n2. Perform the action.\n3. Observe the issue.'} value={form.steps} onChange={update} required />
+          <div className="form-grid-2">
+            <FormField label="Expected Result" name="expected" kind="textarea" placeholder="What should happen?" value={form.expected} onChange={update} required />
+            <FormField label="Actual Result" name="actual" kind="textarea" placeholder="What actually happened?" value={form.actual} onChange={update} required />
           </div>
+          <div className="form-grid-2">
+            <FormField label="Priority" name="priority" choices={optionsWithCurrent(['High', 'Medium', 'Low'], form.priority)} value={form.priority} onChange={update} required />
+            <FormField label="Severity" name="severity" choices={optionsWithCurrent(['High', 'Medium', 'Low'], form.severity)} value={form.severity} onChange={update} required />
+          </div>
+          <FormField label="Impact" name="impact" kind="textarea" placeholder="Describe how the issue affects users" value={form.impact} onChange={update} />
+          <FormField label="Comments" name="notes" kind="textarea" placeholder="Additional observations" value={form.notes} onChange={update} />
+          <FormField label="Attachment Link (Image or Video URL)" name="media" placeholder="https://..." value={form.media} onChange={update} />
+          <details className="expandable-details">
+            <summary>Additional environment details</summary>
+            <div className="form-grid-2 mt-3">
+              <FormField label="Game / App Title" name="appName" value={form.appName} onChange={update} />
+              <FormField label="Build / Version" name="build" value={form.build} onChange={update} />
+              <FormField label="Reproduction Frequency" name="frequency" choices={optionsWithCurrent(['Not provided', '100% (5/5 attempts)', 'Intermittent (~60%)', 'Once only'], form.frequency)} value={form.frequency} onChange={update} />
+            </div>
+          </details>
         </>
       ) : (
         /* Test Case Form */

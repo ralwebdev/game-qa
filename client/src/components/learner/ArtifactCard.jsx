@@ -102,6 +102,12 @@ export default function ArtifactCard({ item, kind, onDelete, onSave }) {
                   <td>Category</td>
                   <td>{item.category || 'Gameplay'}</td>
                 </tr>
+                {item.description && (
+                  <tr><td>Issue Description</td><td style={{ whiteSpace: 'pre-line' }}>{item.description}</td></tr>
+                )}
+                {item.os && (
+                  <tr><td>Operating System Version</td><td>{item.os}</td></tr>
+                )}
                 {item.appName && (
                   <tr>
                     <td>App / Build</td>
@@ -150,7 +156,7 @@ export default function ArtifactCard({ item, kind, onDelete, onSave }) {
                 )}
                 {item.notes && (
                   <tr>
-                    <td>Notes</td>
+                    <td>Comments</td>
                     <td>{item.notes}</td>
                   </tr>
                 )}

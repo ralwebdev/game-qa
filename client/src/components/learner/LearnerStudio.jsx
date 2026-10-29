@@ -81,7 +81,7 @@ export default function LearnerStudio({ tab, user, setUser, go, run, setNotice }
       )}
 
       {tab === 'practice' && (
-        <PracticeTab run={run} setNotice={setNotice} />
+        <PracticeTab run={run} setNotice={setNotice} user={user} setUser={setUser} />
       )}
 
       {tab === 'portfolio' && (

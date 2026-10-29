@@ -3,14 +3,18 @@ import { Bug, FileCheck, Sparkles, CheckCircle2 } from 'lucide-react';
 import ArtifactForm from './ArtifactForm';
 import { post } from '../../services/api';
 
-export default function PracticeTab({ run, setNotice }) {
+export default function PracticeTab({ run, setNotice, user, setUser }) {
   const [practiceMode, setPracticeMode] = useState('bug'); // 'bug' | 'case'
 
-  const handleSaveBug = (data) => {
-    run(async () => {
+  const handleSaveBug = async (data) => {
+    let saved = false;
+    await run(async () => {
       await post('/bugs', data);
+      setUser((previous) => ({ ...previous, device: data.device.trim(), os: data.os.trim() }));
       setNotice('Defect report successfully logged into your QA portfolio!');
+      saved = true;
     });
+    return saved;
   };
 
   const handleSaveCase = (data) => {
@@ -51,9 +55,9 @@ export default function PracticeTab({ run, setNotice }) {
       </div>
 
       {practiceMode === 'bug' ? (
-        <ArtifactForm kind="bug" onSave={handleSaveBug} />
+        <ArtifactForm key="bug" kind="bug" onSave={handleSaveBug} savedDevice={{ device: user.device, os: user.os }} />
       ) : (
-        <ArtifactForm kind="case" onSave={handleSaveCase} />
+        <ArtifactForm key="case" kind="case" onSave={handleSaveCase} />
       )}
     </div>
   );
