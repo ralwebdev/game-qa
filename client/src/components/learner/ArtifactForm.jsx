@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
-import { 
-  Bug, 
-  FileCheck, 
-  Send, 
-  AlertTriangle, 
-  Info, 
-  Layers, 
-  Sparkles, 
-  Monitor, 
-  HelpCircle 
+import {
+  Bug,
+  FileCheck,
+  Send,
+  AlertTriangle,
+  Info,
+  Layers,
+  Sparkles,
+  Monitor,
+  HelpCircle
 } from 'lucide-react';
 import FormField from '../common/FormField';
 import DeviceFields, { blankDevice, legacyDevice } from './DeviceFields';
@@ -81,8 +81,8 @@ export default function ArtifactForm({ kind = 'bug', initial, onSave, buttonText
             {initial
               ? `Edit ${kind === 'bug' ? 'Defect Report' : 'Test Case'}`
               : kind === 'bug'
-              ? 'Defect Report Studio'
-              : 'Test Case Authoring Studio'}
+                ? 'Defect Report Studio'
+                : 'Test Case Authoring Studio'}
           </h2>
         </div>
         <span className={`badge ${kind === 'bug' ? 'badge-major' : 'badge-minor'}`}>
@@ -95,7 +95,7 @@ export default function ArtifactForm({ kind = 'bug', initial, onSave, buttonText
           <div className="mb-4">
             <h4>Game and Tested Devices</h4>
             <div className="form-grid-2">
-              <FormField label="Game / App Title" name="appName" placeholder="e.g. PlayzHub / Parking Sort" value={form.appName} onChange={update} />
+              <FormField label="Game Title" name="appName" placeholder="e.g. Parking Sort" value={form.appName} onChange={update} />
               <FormField label="Build / Version" name="build" placeholder="e.g. 1.2.0" value={form.build} onChange={update} />
             </div>
             {form.devices.map((device, index) => <div key={index} className="mb-3" style={{ border: '1px solid var(--border-subtle)', padding: 12, borderRadius: 'var(--radius-sm)' }}>
@@ -132,7 +132,6 @@ export default function ArtifactForm({ kind = 'bug', initial, onSave, buttonText
           <FormField label="Impact" name="impact" kind="textarea" placeholder="Describe how the issue affects users" value={form.impact} onChange={update} />
           <FormField label="Comments" name="notes" kind="textarea" placeholder="Additional observations" value={form.notes} onChange={update} />
           <FormField label="Attachment Link (Image or Video URL)" name="media" placeholder="https://..." value={form.media} onChange={update} />
-          <FormField label="Reproduction Frequency" name="frequency" placeholder="e.g. 2/5 attempts, or unknown" value={form.frequency} onChange={update} />
           <details className="expandable-details">
             <summary>Review report before saving</summary>
             <p><strong>Game:</strong> {form.appName || 'Not provided'} &nbsp; <strong>Build:</strong> {form.build || 'Not provided'}</p>
@@ -143,7 +142,7 @@ export default function ArtifactForm({ kind = 'bug', initial, onSave, buttonText
             <p style={{ whiteSpace: 'pre-line' }}><strong>Steps:</strong> {form.steps || 'Not provided'}</p>
             <p><strong>Expected:</strong> {form.expected || 'Not provided'}</p>
             <p><strong>Actual:</strong> {form.actual || 'Not provided'}</p>
-            <p><strong>Priority:</strong> {form.priority} &nbsp; <strong>Severity:</strong> {form.severity} &nbsp; <strong>Frequency:</strong> {form.frequency || 'Not provided'}</p>
+            <p><strong>Priority:</strong> {form.priority} &nbsp; <strong>Severity:</strong> {form.severity}</p>
             <p><strong>Impact:</strong> {form.impact || 'Not provided'}</p>
             <p><strong>Comments:</strong> {form.notes || 'Not provided'}</p>
             <p><strong>Attachment:</strong> {form.media || 'Not provided'}</p>
