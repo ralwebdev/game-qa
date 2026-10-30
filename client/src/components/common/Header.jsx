@@ -7,10 +7,9 @@ import {
   Search, 
   FlaskConical, 
   Folder, 
-  MoreHorizontal, 
   LogOut, 
   ShieldCheck, 
-  User as UserIcon 
+  Settings
 } from 'lucide-react';
 
 export const NAV_ITEMS = [
@@ -19,7 +18,7 @@ export const NAV_ITEMS = [
   { key: 'theory', label: 'Theory', icon: Search },
   { key: 'practice', label: 'Practice', icon: FlaskConical },
   { key: 'portfolio', label: 'Portfolio', icon: Folder },
-  { key: 'more', label: 'More', icon: MoreHorizontal }
+  { key: 'settings', label: 'Settings', icon: Settings }
 ];
 
 export default function Header({ user, currentTab, onLogout }) {

@@ -95,7 +95,7 @@ export default function LearnerStudio({ tab, user, setUser, go, run, setNotice }
         />
       )}
 
-      {tab === 'more' && (
+      {tab === 'settings' && (
         <MoreTab
           user={user}
           setUser={setUser}

@@ -8,7 +8,7 @@ import AdminDashboard from './components/admin/AdminDashboard';
 import { api, post } from './services/api';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 
-const tabPaths = { home: '/', course: '/course', theory: '/theory', practice: '/practice', portfolio: '/portfolio', more: '/more' };
+const tabPaths = { home: '/', course: '/course', theory: '/theory', practice: '/practice', portfolio: '/portfolio', settings: '/settings' };
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -127,6 +127,8 @@ export default function App() {
         }} onError={setError} />
       ) : user.role === 'admin' ? (
         location.pathname === '/admin' ? <AdminDashboard key={refresh} run={run} setNotice={setNotice} /> : <Navigate to="/admin" replace />
+      ) : ['/more', '/profile'].includes(location.pathname) ? (
+        <Navigate to="/settings" replace />
       ) : !tab ? (
         <Navigate to="/" replace />
       ) : (

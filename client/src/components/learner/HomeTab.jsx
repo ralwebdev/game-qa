@@ -171,7 +171,7 @@ export default function HomeTab({ user, dash, modules, bugs, cases, go, run, set
             <button
               type="button"
               className="btn primary"
-              onClick={() => go('more')}
+              onClick={() => go('settings')}
             >
               <Award size={16} /> View & Print Certificate
             </button>
@@ -189,7 +189,7 @@ export default function HomeTab({ user, dash, modules, bugs, cases, go, run, set
           <button
             type="button"
             className="btn"
-            onClick={() => go('more')}
+            onClick={() => go('settings')}
           >
             Certificate Center Details
           </button>
