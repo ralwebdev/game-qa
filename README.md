@@ -33,6 +33,8 @@ Or after installing both subprojects, from repository root run `npm install` and
 
 Use environment variables for secrets, HTTPS behind a reverse proxy, and MongoDB credentials restricted to this database. Set `NODE_ENV=production` and configure `CLIENT_ORIGIN` for your deployed hostname. Build the React client with `npm run build --prefix client`, then start the Express server with `npm start --prefix server`. The server serves the built client automatically in production.
 
+Set `VITE_SITE_URL` to the public site origin (for example, `https://example.com`) when building the client so social sharing tags use an absolute image URL. It can be set in `client/.env.production` or in the build environment.
+
 ### AWS Lightsail redeploy
 
 The repository includes `deploy.sh` for the usual steps after `git pull`: install the exact locked dependencies, build the client, and restart the application. Give it execute permission once, then run it after each pull:
