@@ -6,11 +6,16 @@ import AuthScreen from './components/auth/AuthScreen';
 import LearnerStudio from './components/learner/LearnerStudio';
 import AdminDashboard from './components/admin/AdminDashboard';
 import { api, post } from './services/api';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+
+const tabPaths = { home: '/', course: '/course', theory: '/theory', practice: '/practice', portfolio: '/portfolio', more: '/more' };
 
 export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState('home');
+  const location = useLocation();
+  const navigate = useNavigate();
+  const tab = Object.keys(tabPaths).find((key) => tabPaths[key] === location.pathname);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [refresh, setRefresh] = useState(0);
@@ -39,16 +44,22 @@ export default function App() {
     run(async () => {
       await post('/auth/logout', {});
       setUser(null);
-      setTab('home');
+      navigate(user.role === 'admin' ? '/admin' : '/');
     });
   };
 
   const handleSelectTab = (newTab) => {
-    setTab(newTab);
+    navigate(tabPaths[newTab] || '/');
     setError('');
     setNotice('');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  useEffect(() => {
+    setError('');
+    setNotice('');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [location.pathname]);
 
   if (loading) {
     return (
@@ -69,7 +80,6 @@ export default function App() {
       <Header
         user={user}
         currentTab={tab}
-        onSelectTab={handleSelectTab}
         onLogout={handleLogout}
       />
 
@@ -110,9 +120,15 @@ export default function App() {
 
       {/* Main Content Router */}
       {!user ? (
-        <AuthScreen onAuth={setUser} onError={setError} />
+        <AuthScreen onAuth={(authenticatedUser) => {
+          setUser(authenticatedUser);
+          if (authenticatedUser.role === 'admin') navigate('/admin', { replace: true });
+          else if (location.pathname === '/admin') navigate('/', { replace: true });
+        }} onError={setError} />
       ) : user.role === 'admin' ? (
-        <AdminDashboard key={refresh} run={run} setNotice={setNotice} />
+        location.pathname === '/admin' ? <AdminDashboard key={refresh} run={run} setNotice={setNotice} /> : <Navigate to="/admin" replace />
+      ) : !tab ? (
+        <Navigate to="/" replace />
       ) : (
         <>
           <main className="layout learner">
@@ -126,7 +142,7 @@ export default function App() {
               setNotice={setNotice}
             />
           </main>
-          <MobileNavigation currentTab={tab} onSelectTab={handleSelectTab} />
+          <MobileNavigation currentTab={tab} />
         </>
       )}
     </>

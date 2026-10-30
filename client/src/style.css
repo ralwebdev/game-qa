@@ -231,6 +231,7 @@ code, pre {
 }
 
 .nav-tab-btn {
+  text-decoration: none;
   display: inline-flex;
   align-items: center;
   gap: 7px;
@@ -324,7 +325,8 @@ code, pre {
   }
 }
 
-.mobile-nav-bar button {
+.mobile-nav-bar a {
+  text-decoration: none;
   border: none;
   background: transparent;
   color: var(--text-muted);
@@ -344,11 +346,11 @@ code, pre {
   white-space: nowrap;
 }
 
-.mobile-nav-bar button.active {
+.mobile-nav-bar a.active {
   color: var(--primary);
 }
 
-.mobile-nav-bar button:active {
+.mobile-nav-bar a:active {
   transform: scale(0.94);
 }
 

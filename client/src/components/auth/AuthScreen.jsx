@@ -2,9 +2,12 @@ import React, { useState } from 'react';
 import { Gamepad2, Shield, Sparkles, CheckCircle2, Lock, ArrowRight } from 'lucide-react';
 import FormField from '../common/FormField';
 import { post } from '../../services/api';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export default function AuthScreen({ onAuth, onError }) {
-  const [isAdminPath, setIsAdminPath] = useState(window.location.pathname === '/admin');
+  const location = useLocation();
+  const navigate = useNavigate();
+  const isAdminPath = location.pathname === '/admin';
   const [mode, setMode] = useState('login'); // 'login' | 'register'
   const [form, setForm] = useState({
     name: '',
@@ -166,7 +169,7 @@ export default function AuthScreen({ onAuth, onError }) {
             className="btn-link"
             style={{ fontSize: '0.82rem' }}
             onClick={() => {
-              setIsAdminPath(!isAdminPath);
+              navigate(isAdminPath ? '/' : '/admin');
               onError('');
             }}
           >

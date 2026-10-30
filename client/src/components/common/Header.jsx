@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { 
   Gamepad2, 
   Home, 
@@ -21,7 +22,7 @@ export const NAV_ITEMS = [
   { key: 'more', label: 'More', icon: MoreHorizontal }
 ];
 
-export default function Header({ user, currentTab, onSelectTab, onLogout }) {
+export default function Header({ user, currentTab, onLogout }) {
   return (
     <header className="app-header">
       <div className="brand">
@@ -36,15 +37,15 @@ export default function Header({ user, currentTab, onSelectTab, onLogout }) {
       {user && user.role !== 'admin' && (
         <nav className="header-nav no-print" aria-label="Main Navigation">
           {NAV_ITEMS.map(({ key, label, icon: Icon }) => (
-            <button
+            <Link
               key={key}
-              type="button"
+              to={key === 'home' ? '/' : `/${key}`}
               className={`nav-tab-btn ${currentTab === key ? 'active' : ''}`}
-              onClick={() => onSelectTab(key)}
+              aria-current={currentTab === key ? 'page' : undefined}
             >
               <Icon size={16} />
               <span>{label}</span>
-            </button>
+            </Link>
           ))}
         </nav>
       )}
