@@ -1,47 +1,610 @@
 import 'dotenv/config';
-import express from 'express'; import mongoose from 'mongoose'; import bcrypt from 'bcryptjs'; import jwt from 'jsonwebtoken'; import cookieParser from 'cookie-parser'; import cors from 'cors'; import helmet from 'helmet'; import rateLimit from 'express-rate-limit'; import crypto from 'crypto'; import path from 'path'; import { fileURLToPath } from 'url';
+import express from 'express';
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import cookieParser from 'cookie-parser';
+import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import crypto from 'crypto';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { User, Module, Theory, Bug, TestCase, Feedback, Certificate } from './models.js';
-if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) { console.error('Set JWT_SECRET to at least 32 characters'); process.exit(1) }
-const app = express(); app.disable('x-powered-by'); app.use(helmet({ contentSecurityPolicy: false })); app.use(cors({ origin: process.env.CLIENT_ORIGIN || 'http://localhost:5173', credentials: true })); app.use(express.json({ limit: '1mb' })); app.use(cookieParser());
-const api = express.Router(); app.use('/api', api);
-const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
-function safeUser(u) { return { _id: u._id, name: u.name, email: u.email, role: u.role, learnerRole: u.learnerRole, disabled: u.disabled, device: u.device, os: u.os, devices: u.devices, completedModules: u.completedModules, createdAt: u.createdAt } }
-function token(u) { return jwt.sign({ sub: String(u._id), role: u.role }, process.env.JWT_SECRET, { expiresIn: '2d' }) }
-function setSession(res, u) { res.cookie('gqa_session', token(u), { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', maxAge: 2 * 86400000 }); }
-const auth = asyncHandler(async (req, res, next) => { const raw = req.cookies.gqa_session; if (!raw) return res.status(401).json({ message: 'Please sign in' }); let payload; try { payload = jwt.verify(raw, process.env.JWT_SECRET) } catch { return res.status(401).json({ message: 'Session expired' }) } const user = await User.findById(payload.sub); if (!user || user.disabled) return res.status(401).json({ message: 'Account disabled or unavailable' }); req.user = user; next() });
-const admin = (req, res, next) => req.user.role === 'admin' ? next() : res.status(403).json({ message: 'Admin access required' });
+import { getRedisClient, cacheMiddleware, invalidateCachePattern } from './redis.js';
+
+if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
+  console.error('Set JWT_SECRET to at least 32 characters');
+  process.exit(1);
+}
+
+// Global Mongoose query timeout plugin to prevent runaway queries on Atlas M0 & 2GB RAM
+mongoose.plugin((schema) => {
+  schema.pre(['find', 'findOne', 'findOneAndUpdate', 'countDocuments', 'estimatedDocumentCount'], function () {
+    if (!this.getOptions().maxTimeMS) {
+      this.maxTimeMS(5000);
+    }
+  });
+});
+
+const app = express();
+app.disable('x-powered-by');
+app.use(helmet({ contentSecurityPolicy: false }));
+app.use(cors({ origin: process.env.CLIENT_ORIGIN || 'http://localhost:5173', credentials: true }));
+app.use(express.json({ limit: '1mb' }));
+app.use(cookieParser());
+
+// Initialize Redis client
+getRedisClient();
+
+const api = express.Router();
+app.use('/api', api);
+
+const asyncHandler = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+
+function safeUser(u) {
+  return {
+    _id: u._id,
+    name: u.name,
+    email: u.email,
+    role: u.role,
+    learnerRole: u.learnerRole,
+    disabled: u.disabled,
+    device: u.device,
+    os: u.os,
+    devices: u.devices,
+    completedModules: u.completedModules,
+    createdAt: u.createdAt,
+  };
+}
+
+function token(u) {
+  return jwt.sign({ sub: String(u._id), role: u.role }, process.env.JWT_SECRET, { expiresIn: '2d' });
+}
+
+function setSession(res, u) {
+  res.cookie('gqa_session', token(u), {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 2 * 86400000,
+  });
+}
+
+const auth = asyncHandler(async (req, res, next) => {
+  const raw = req.cookies.gqa_session;
+  if (!raw) return res.status(401).json({ message: 'Please sign in' });
+  let payload;
+  try {
+    payload = jwt.verify(raw, process.env.JWT_SECRET);
+  } catch {
+    return res.status(401).json({ message: 'Session expired' });
+  }
+  const user = await User.findById(payload.sub).select('-passwordHash');
+  if (!user || user.disabled) return res.status(401).json({ message: 'Account disabled or unavailable' });
+  req.user = user;
+  next();
+});
+
+const admin = (req, res, next) =>
+  req.user.role === 'admin' ? next() : res.status(403).json({ message: 'Admin access required' });
+
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 30, standardHeaders: 'draft-7', legacyHeaders: false });
 const clean = (s, max = 5000) => String(s ?? '').trim().slice(0, max);
-function cleanDevices(items) { if (!Array.isArray(items) || !items.length || items.length > 20) return null; const devices = items.map(d => ({ platform: clean(d?.platform, 30), device: clean(d?.device, 200), os: clean(d?.os, 100), cpu: clean(d?.cpu, 200), gpu: clean(d?.gpu, 200), graphics: clean(d?.graphics, 100), result: clean(d?.result, 30) })); return devices.every(d => ['Android', 'PC', 'Other'].includes(d.platform) && d.device && d.os && (!d.result || ['Reproduced', 'Not reproduced', 'Not tested'].includes(d.result))) ? devices : null; }
 
-api.post('/auth/register', limiter, asyncHandler(async (req, res) => { let { name, email, password, learnerRole } = req.body; name = clean(name, 80); email = clean(email, 200).toLowerCase(); if (!name || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || typeof password !== 'string' || password.length < 8 || password.length > 128) return res.status(400).json({ message: 'Valid name, email and password (8-128 characters) required' }); if (await User.exists({ email })) return res.status(409).json({ message: 'Email already registered' }); const u = await User.create({ name, email, passwordHash: await bcrypt.hash(password, 12), learnerRole: ['Student', 'Aspiring Tester', 'Working Professional'].includes(learnerRole) ? learnerRole : 'Student' }); setSession(res, u); res.status(201).json({ user: safeUser(u) }) }));
-api.post('/auth/login', limiter, asyncHandler(async (req, res) => { const u = await User.findOne({ email: clean(req.body.email, 200).toLowerCase() }).select('+passwordHash'); if (!u || u.disabled || !await bcrypt.compare(String(req.body.password || ''), u.passwordHash)) return res.status(401).json({ message: 'Invalid credentials' }); setSession(res, u); res.json({ user: safeUser(u) }) }));
-api.post('/auth/admin/login', limiter, asyncHandler(async (req, res) => { const u = await User.findOne({ email: clean(req.body.email, 200).toLowerCase(), role: 'admin' }).select('+passwordHash'); if (!u || u.disabled || !await bcrypt.compare(String(req.body.password || ''), u.passwordHash)) return res.status(401).json({ message: 'Invalid administrator credentials' }); setSession(res, u); res.json({ user: safeUser(u) }) }));
-api.post('/auth/logout', (req, res) => { res.clearCookie('gqa_session', { sameSite: 'lax', secure: process.env.NODE_ENV === 'production' }); res.json({ ok: true }) });
+function cleanDevices(items) {
+  if (!Array.isArray(items) || !items.length || items.length > 20) return null;
+  const devices = items.map((d) => ({
+    platform: clean(d?.platform, 30),
+    device: clean(d?.device, 200),
+    os: clean(d?.os, 100),
+    cpu: clean(d?.cpu, 200),
+    gpu: clean(d?.gpu, 200),
+    graphics: clean(d?.graphics, 100),
+    result: clean(d?.result, 30),
+  }));
+  return devices.every(
+    (d) =>
+      ['Android', 'PC', 'Other'].includes(d.platform) &&
+      d.device &&
+      d.os &&
+      (!d.result || ['Reproduced', 'Not reproduced', 'Not tested'].includes(d.result))
+  )
+    ? devices
+    : null;
+}
+
+api.post('/auth/register', limiter, asyncHandler(async (req, res) => {
+  let { name, email, password, learnerRole } = req.body;
+  name = clean(name, 80);
+  email = clean(email, 200).toLowerCase();
+  if (
+    !name ||
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
+    typeof password !== 'string' ||
+    password.length < 8 ||
+    password.length > 128
+  ) {
+    return res.status(400).json({ message: 'Valid name, email and password (8-128 characters) required' });
+  }
+  if (await User.exists({ email })) return res.status(409).json({ message: 'Email already registered' });
+  const u = await User.create({
+    name,
+    email,
+    passwordHash: await bcrypt.hash(password, 12),
+    learnerRole: ['Student', 'Aspiring Tester', 'Working Professional'].includes(learnerRole)
+      ? learnerRole
+      : 'Student',
+  });
+  setSession(res, u);
+  res.status(201).json({ user: safeUser(u) });
+}));
+
+api.post('/auth/login', limiter, asyncHandler(async (req, res) => {
+  const u = await User.findOne({ email: clean(req.body.email, 200).toLowerCase() }).select('+passwordHash');
+  if (!u || u.disabled || !(await bcrypt.compare(String(req.body.password || ''), u.passwordHash))) {
+    return res.status(401).json({ message: 'Invalid credentials' });
+  }
+  setSession(res, u);
+  res.json({ user: safeUser(u) });
+}));
+
+api.post('/auth/admin/login', limiter, asyncHandler(async (req, res) => {
+  const u = await User.findOne({ email: clean(req.body.email, 200).toLowerCase(), role: 'admin' }).select('+passwordHash');
+  if (!u || u.disabled || !(await bcrypt.compare(String(req.body.password || ''), u.passwordHash))) {
+    return res.status(401).json({ message: 'Invalid administrator credentials' });
+  }
+  setSession(res, u);
+  res.json({ user: safeUser(u) });
+}));
+
+api.post('/auth/logout', (req, res) => {
+  res.clearCookie('gqa_session', { sameSite: 'lax', secure: process.env.NODE_ENV === 'production' });
+  res.json({ ok: true });
+});
+
 api.get('/auth/me', auth, (req, res) => res.json({ user: safeUser(req.user) }));
-api.patch('/auth/me', auth, asyncHandler(async (req, res) => { if (req.body.name !== undefined) { const name = clean(req.body.name, 80); if (!name) return res.status(400).json({ message: 'Name required' }); req.user.name = name } if (['Student', 'Aspiring Tester', 'Working Professional'].includes(req.body.learnerRole)) req.user.learnerRole = req.body.learnerRole; if (req.body.devices !== undefined) { const devices = cleanDevices(req.body.devices); if (!devices) return res.status(400).json({ message: 'Each device needs a platform, model and OS version' }); req.user.devices = devices; req.user.device = devices[0].device; req.user.os = devices[0].os } if (req.body.device !== undefined || req.body.os !== undefined) { const device = clean(req.body.device, 200), os = clean(req.body.os, 100); if (!device || !os) return res.status(400).json({ message: 'Device model and Android version required' }); req.user.device = device; req.user.os = os } await req.user.save(); res.json({ user: safeUser(req.user) }) }));
-api.get('/modules', auth, asyncHandler(async (req, res) => res.json(await Module.find(req.user.role === 'admin' ? {} : { published: true }).sort({ order: 1, _id: 1 }))));
-api.get('/theory', auth, asyncHandler(async (req, res) => res.json(await Theory.find(req.user.role === 'admin' ? {} : { published: true }).sort({ createdAt: 1 }))));
-api.get('/dashboard', auth, asyncHandler(async (req, res) => { const [modules, bugs, cases, certificate] = await Promise.all([Module.countDocuments({ published: true }), Bug.countDocuments({ user: req.user._id }), TestCase.countDocuments({ user: req.user._id }), Certificate.findOne({ user: req.user._id }).select('code issuedAt fileName')]); const valid = await Module.countDocuments({ _id: { $in: req.user.completedModules }, published: true }); res.json({ modules, completed: valid, bugs, cases, eligible: modules > 0 && valid === modules && bugs > 0 && cases > 0, certificate }) }));
-api.post('/modules/:id/complete', auth, asyncHandler(async (req, res) => { if (!mongoose.isValidObjectId(req.params.id)) return res.status(400).json({ message: 'Invalid module' }); const m = await Module.findOne({ _id: req.params.id, published: true }); if (!m) return res.status(404).json({ message: 'Module unavailable' }); await User.findByIdAndUpdate(req.user._id, { $addToSet: { completedModules: m._id } }); res.json({ ok: true }) }));
-const bugFields = ['title', 'category', 'description', 'device', 'severity', 'priority', 'steps', 'expected', 'actual', 'appName', 'build', 'os', 'frequency', 'preconditions', 'impact', 'media', 'notes']; const caseFields = ['feature', 'objective', 'preconditions', 'steps', 'expected', 'result'];
-function pick(body, fields) { return Object.fromEntries(fields.filter(k => body[k] !== undefined).map(k => [k, clean(body[k])])) }
-function crud(resource, fields, required) { api.get('/' + resource, auth, asyncHandler(async (req, res) => res.json(await (resource === 'bugs' ? Bug : TestCase).find({ user: req.user._id }).sort({ createdAt: -1 })))); api.post('/' + resource, auth, asyncHandler(async (req, res) => { const data = pick(req.body, fields); if (resource === 'bugs') { const devices = cleanDevices(req.body.devices ?? [{ platform: 'Android', device: data.device, os: data.os }]); if (!devices) return res.status(400).json({ message: 'Add at least one valid tested device' }); data.devices = devices; data.device = devices[0].device; data.os = devices[0].os } if (required.some(k => !data[k])) return res.status(400).json({ message: 'Fill required fields' }); const Model = resource === 'bugs' ? Bug : TestCase; const created = await Model.create({ ...data, user: req.user._id }); if (resource === 'bugs') { req.user.device = data.device; req.user.os = data.os; const saved = (req.user.devices || []).map(d => d.toObject()); for (const d of data.devices) { const entry = { ...d, result: '' }; const i = saved.findIndex(v => v.platform === entry.platform && v.device.toLowerCase() === entry.device.toLowerCase() && v.os.toLowerCase() === entry.os.toLowerCase()); if (i < 0) saved.push(entry); else saved[i] = entry } req.user.devices = saved.slice(-20); await req.user.save() } res.status(201).json(created) })); api.patch('/' + resource + '/:id', auth, asyncHandler(async (req, res) => { const Model = resource === 'bugs' ? Bug : TestCase; const doc = await Model.findOne({ _id: req.params.id, user: req.user._id }); if (!doc) return res.status(404).json({ message: 'Not found' }); Object.assign(doc, pick(req.body, fields)); if (resource === 'bugs' && req.body.devices !== undefined) { const devices = cleanDevices(req.body.devices); if (!devices) return res.status(400).json({ message: 'Add at least one valid tested device' }); doc.devices = devices; doc.device = devices[0].device; doc.os = devices[0].os } if (required.some(k => !doc[k])) return res.status(400).json({ message: 'Fill required fields' }); doc.status = 'submitted'; doc.reviewNote = ''; await doc.save(); res.json(doc) })); api.delete('/' + resource + '/:id', auth, asyncHandler(async (req, res) => { const Model = resource === 'bugs' ? Bug : TestCase; const v = await Model.findOneAndDelete({ _id: req.params.id, user: req.user._id }); if (!v) return res.status(404).json({ message: 'Not found' }); res.json({ ok: true }) })) }
-crud('bugs', bugFields, ['title', 'category', 'device', 'os', 'severity', 'priority', 'steps', 'expected', 'actual']); crud('cases', caseFields, ['feature', 'objective', 'steps', 'expected']);
-api.post('/feedback', auth, asyncHandler(async (req, res) => { const message = clean(req.body.message, 3000), rating = Number(req.body.rating); if (!message || !Number.isInteger(rating) || rating < 1 || rating > 5) return res.status(400).json({ message: 'Rating (1-5) and message required' }); res.status(201).json(await Feedback.create({ user: req.user._id, rating, message })) }));
-api.get('/feedback', auth, asyncHandler(async (req, res) => res.json(await Feedback.find({ user: req.user._id }).sort({ createdAt: -1 }))));
-api.post('/certificates/issue', auth, asyncHandler(async (req, res) => { const [modules, bugs, cases] = await Promise.all([Module.find({ published: true }).select('_id'), Bug.countDocuments({ user: req.user._id }), TestCase.countDocuments({ user: req.user._id })]); const done = new Set(req.user.completedModules.map(String)); if (!modules.length || !modules.every(m => done.has(String(m._id))) || !bugs || !cases) return res.status(403).json({ message: 'Complete all published modules and create at least one bug report and test case' }); let cert = await Certificate.findOne({ user: req.user._id }); if (!cert) cert = await Certificate.create({ user: req.user._id, code: 'GQA-' + crypto.randomBytes(7).toString('hex').toUpperCase() }); res.json(cert) }));
-api.get('/certificates/download', auth, asyncHandler(async (req, res) => { const cert = await Certificate.findOne({ user: req.user._id }).select('+fileData fileName fileContentType'); if (!cert?.fileData) return res.status(404).json({ message: 'No uploaded certificate is available' }); res.type(cert.fileContentType || 'application/octet-stream'); res.attachment(cert.fileName || 'certificate'); res.send(cert.fileData) }));
-api.get('/certificates/verify/:code', asyncHandler(async (req, res) => { const cert = await Certificate.findOne({ code: req.params.code }).populate('user', 'name'); if (!cert) return res.status(404).json({ message: 'Certificate not found' }); res.json({ code: cert.code, learner: cert.user?.name, issuedAt: cert.issuedAt, course: 'Scope GT', note: 'Course completion, not an accredited professional certification' }) }));
-api.get('/admin/stats', auth, admin, asyncHandler(async (req, res) => { const [learners, modules, bugs, cases, feedback, certificates] = await Promise.all([User.countDocuments({ role: 'learner' }), Module.countDocuments(), Bug.countDocuments(), TestCase.countDocuments(), Feedback.countDocuments(), Certificate.countDocuments()]); res.json({ learners, modules, bugs, cases, feedback, certificates }) }));
-api.get('/admin/users', auth, admin, asyncHandler(async (req, res) => { const users = await User.find({ role: 'learner' }).sort({ createdAt: -1 }).limit(500).select('-passwordHash').lean(); const certificates = await Certificate.find({ user: { $in: users.map(u => u._id) } }).select('user fileName issuedAt').lean(); const byUser = new Map(certificates.map(c => [String(c.user), c])); res.json(users.map(u => ({ ...u, certificate: byUser.get(String(u._id)) || null }))) }));
-api.patch('/admin/users/:id', auth, admin, asyncHandler(async (req, res) => { const u = await User.findOne({ _id: req.params.id, role: 'learner' }); if (!u) return res.status(404).json({ message: 'Learner not found' }); if (typeof req.body.disabled === 'boolean') u.disabled = req.body.disabled; await u.save(); res.json(safeUser(u)) }));
-api.put('/admin/users/:id/certificate-file', auth, admin, express.raw({ type: ['application/pdf', 'image/png', 'image/jpeg'], limit: '10mb' }), asyncHandler(async (req, res) => { if (!mongoose.isValidObjectId(req.params.id)) return res.status(400).json({ message: 'Invalid learner' }); const learner = await User.exists({ _id: req.params.id, role: 'learner' }); if (!learner) return res.status(404).json({ message: 'Learner not found' }); if (!Buffer.isBuffer(req.body) || !req.body.length) return res.status(400).json({ message: 'Choose a PDF, PNG, or JPEG certificate file' }); const contentType = req.get('content-type'); const suppliedName = decodeURIComponent(req.get('x-file-name') || 'certificate'); const fileName = (path.basename(suppliedName).replace(/[^a-zA-Z0-9._ -]/g, '_').slice(0, 150) || 'certificate'); const cert = await Certificate.findOneAndUpdate({ user: req.params.id }, { $set: { fileName, fileContentType: contentType, fileData: req.body }, $setOnInsert: { code: 'GQA-' + crypto.randomBytes(7).toString('hex').toUpperCase(), issuedAt: new Date() } }, { new: true, upsert: true, setDefaultsOnInsert: true }); res.json({ code: cert.code, fileName: cert.fileName, issuedAt: cert.issuedAt }) }));
-for (const [pathPart, Model, allowed] of [['modules', Module, ['title', 'summary', 'explanation', 'example', 'activity', 'quiz', 'order', 'published']], ['theory', Theory, ['tag', 'title', 'summary', 'meaning', 'importance', 'example', 'action', 'published']]]) { api.post('/admin/' + pathPart, auth, admin, asyncHandler(async (req, res) => { const data = Object.fromEntries(allowed.filter(k => req.body[k] !== undefined).map(k => [k, req.body[k]])); res.status(201).json(await Model.create(data)) })); api.patch('/admin/' + pathPart + '/:id', auth, admin, asyncHandler(async (req, res) => { const data = Object.fromEntries(allowed.filter(k => req.body[k] !== undefined).map(k => [k, req.body[k]])); const v = await Model.findByIdAndUpdate(req.params.id, { $set: data }, { new: true, runValidators: true }); if (!v) return res.status(404).json({ message: 'Not found' }); res.json(v) })); api.delete('/admin/' + pathPart + '/:id', auth, admin, asyncHandler(async (req, res) => { const v = await Model.findByIdAndDelete(req.params.id); if (!v) return res.status(404).json({ message: 'Not found' }); res.json({ ok: true }) })) }
-for (const [key, Model] of [['bugs', Bug], ['cases', TestCase]]) { api.get('/admin/' + key, auth, admin, asyncHandler(async (req, res) => res.json(await Model.find().populate('user', 'name email').sort({ createdAt: -1 }).limit(500)))); api.patch('/admin/' + key + '/:id/review', auth, admin, asyncHandler(async (req, res) => { if (!['submitted', 'reviewed', 'needs_changes'].includes(req.body.status)) return res.status(400).json({ message: 'Invalid review status' }); const d = await Model.findByIdAndUpdate(req.params.id, { $set: { status: req.body.status, reviewNote: clean(req.body.reviewNote, 1000) } }, { new: true }); if (!d) return res.status(404).json({ message: 'Not found' }); res.json(d) })) }
-api.get('/admin/feedback', auth, admin, asyncHandler(async (req, res) => res.json(await Feedback.find().populate('user', 'name email').sort({ createdAt: -1 }).limit(500))));
-api.patch('/admin/feedback/:id', auth, admin, asyncHandler(async (req, res) => { const v = await Feedback.findByIdAndUpdate(req.params.id, { $set: { adminReply: clean(req.body.adminReply, 1000) } }, { new: true }); if (!v) return res.status(404).json({ message: 'Not found' }); res.json(v) }));
-api.get('/admin/certificates', auth, admin, asyncHandler(async (req, res) => res.json(await Certificate.find().populate('user', 'name email').sort({ issuedAt: -1 }).limit(500))));
-api.use((req, res) => res.status(404).json({ message: 'API route not found' })); app.use((err, req, res, next) => { console.error(err); res.status(err.name === 'ValidationError' || err.name === 'CastError' ? 400 : 500).json({ message: err.code === 11000 ? 'Duplicate value' : err.name === 'ValidationError' ? err.message : 'Request failed' }) });
-const root = path.dirname(fileURLToPath(import.meta.url)); const dist = path.resolve(root, '../../client/dist'); if (process.env.NODE_ENV === 'production') { app.use(express.static(dist)); app.get('*', (req, res) => res.sendFile(path.join(dist, 'index.html'))) }
-await mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/game_qa_academy'); app.listen(process.env.PORT || 5000, () => console.log('Game QA API on port ' + (process.env.PORT || 5000)));
+
+api.patch('/auth/me', auth, asyncHandler(async (req, res) => {
+  if (req.body.name !== undefined) {
+    const name = clean(req.body.name, 80);
+    if (!name) return res.status(400).json({ message: 'Name required' });
+    req.user.name = name;
+  }
+  if (['Student', 'Aspiring Tester', 'Working Professional'].includes(req.body.learnerRole)) {
+    req.user.learnerRole = req.body.learnerRole;
+  }
+  if (req.body.devices !== undefined) {
+    const devices = cleanDevices(req.body.devices);
+    if (!devices) return res.status(400).json({ message: 'Each device needs a platform, model and OS version' });
+    req.user.devices = devices;
+    req.user.device = devices[0].device;
+    req.user.os = devices[0].os;
+  }
+  if (req.body.device !== undefined || req.body.os !== undefined) {
+    const device = clean(req.body.device, 200),
+      os = clean(req.body.os, 100);
+    if (!device || !os) return res.status(400).json({ message: 'Device model and Android version required' });
+    req.user.device = device;
+    req.user.os = os;
+  }
+  await req.user.save();
+  res.json({ user: safeUser(req.user) });
+}));
+
+// Read-heavy public/learner endpoints with Redis caching + .lean() + field projections
+api.get(
+  '/modules',
+  auth,
+  cacheMiddleware({ ttlSeconds: 600, keyPrefix: 'modules' }),
+  asyncHandler(async (req, res) => {
+    const query = req.user.role === 'admin' ? {} : { published: true };
+    const modules = await Module.find(query)
+      .select('title summary explanation example activity quiz order published createdAt')
+      .sort({ order: 1, _id: 1 })
+      .lean();
+    res.json(modules);
+  })
+);
+
+api.get(
+  '/theory',
+  auth,
+  cacheMiddleware({ ttlSeconds: 600, keyPrefix: 'theory' }),
+  asyncHandler(async (req, res) => {
+    const query = req.user.role === 'admin' ? {} : { published: true };
+    const theory = await Theory.find(query)
+      .select('tag title summary meaning importance example action published createdAt')
+      .sort({ createdAt: 1 })
+      .lean();
+    res.json(theory);
+  })
+);
+
+api.get('/dashboard', auth, asyncHandler(async (req, res) => {
+  const [modules, bugs, cases, certificate] = await Promise.all([
+    Module.countDocuments({ published: true }),
+    Bug.countDocuments({ user: req.user._id }),
+    TestCase.countDocuments({ user: req.user._id }),
+    Certificate.findOne({ user: req.user._id }).select('code issuedAt fileName').lean(),
+  ]);
+  const valid = await Module.countDocuments({ _id: { $in: req.user.completedModules }, published: true });
+  res.json({
+    modules,
+    completed: valid,
+    bugs,
+    cases,
+    eligible: modules > 0 && valid === modules && bugs > 0 && cases > 0,
+    certificate,
+  });
+}));
+
+api.post('/modules/:id/complete', auth, asyncHandler(async (req, res) => {
+  if (!mongoose.isValidObjectId(req.params.id)) return res.status(400).json({ message: 'Invalid module' });
+  const m = await Module.findOne({ _id: req.params.id, published: true }).select('_id').lean();
+  if (!m) return res.status(404).json({ message: 'Module unavailable' });
+  await User.findByIdAndUpdate(req.user._id, { $addToSet: { completedModules: m._id } });
+  res.json({ ok: true });
+}));
+
+const bugFields = [
+  'title',
+  'category',
+  'description',
+  'device',
+  'severity',
+  'priority',
+  'steps',
+  'expected',
+  'actual',
+  'appName',
+  'build',
+  'os',
+  'frequency',
+  'preconditions',
+  'impact',
+  'media',
+  'notes',
+];
+const caseFields = ['feature', 'objective', 'preconditions', 'steps', 'expected', 'result'];
+
+function pick(body, fields) {
+  return Object.fromEntries(fields.filter((k) => body[k] !== undefined).map((k) => [k, clean(body[k])]));
+}
+
+function crud(resource, fields, required) {
+  api.get('/' + resource, auth, asyncHandler(async (req, res) => {
+    const Model = resource === 'bugs' ? Bug : TestCase;
+    const docs = await Model.find({ user: req.user._id }).sort({ createdAt: -1 }).lean();
+    res.json(docs);
+  }));
+
+  api.post('/' + resource, auth, asyncHandler(async (req, res) => {
+    const data = pick(req.body, fields);
+    if (resource === 'bugs') {
+      const devices = cleanDevices(req.body.devices ?? [{ platform: 'Android', device: data.device, os: data.os }]);
+      if (!devices) return res.status(400).json({ message: 'Add at least one valid tested device' });
+      data.devices = devices;
+      data.device = devices[0].device;
+      data.os = devices[0].os;
+    }
+    if (required.some((k) => !data[k])) return res.status(400).json({ message: 'Fill required fields' });
+    const Model = resource === 'bugs' ? Bug : TestCase;
+    const created = await Model.create({ ...data, user: req.user._id });
+    if (resource === 'bugs') {
+      req.user.device = data.device;
+      req.user.os = data.os;
+      const saved = (req.user.devices || []).map((d) => (d.toObject ? d.toObject() : d));
+      for (const d of data.devices) {
+        const entry = { ...d, result: '' };
+        const i = saved.findIndex(
+          (v) =>
+            v.platform === entry.platform &&
+            v.device.toLowerCase() === entry.device.toLowerCase() &&
+            v.os.toLowerCase() === entry.os.toLowerCase()
+        );
+        if (i < 0) saved.push(entry);
+        else saved[i] = entry;
+      }
+      req.user.devices = saved.slice(-20);
+      await req.user.save();
+    }
+    res.status(201).json(created);
+  }));
+
+  api.patch('/' + resource + '/:id', auth, asyncHandler(async (req, res) => {
+    const Model = resource === 'bugs' ? Bug : TestCase;
+    const doc = await Model.findOne({ _id: req.params.id, user: req.user._id });
+    if (!doc) return res.status(404).json({ message: 'Not found' });
+    Object.assign(doc, pick(req.body, fields));
+    if (resource === 'bugs' && req.body.devices !== undefined) {
+      const devices = cleanDevices(req.body.devices);
+      if (!devices) return res.status(400).json({ message: 'Add at least one valid tested device' });
+      doc.devices = devices;
+      doc.device = devices[0].device;
+      doc.os = devices[0].os;
+    }
+    if (required.some((k) => !doc[k])) return res.status(400).json({ message: 'Fill required fields' });
+    doc.status = 'submitted';
+    doc.reviewNote = '';
+    await doc.save();
+    res.json(doc);
+  }));
+
+  api.delete('/' + resource + '/:id', auth, asyncHandler(async (req, res) => {
+    const Model = resource === 'bugs' ? Bug : TestCase;
+    const v = await Model.findOneAndDelete({ _id: req.params.id, user: req.user._id });
+    if (!v) return res.status(404).json({ message: 'Not found' });
+    res.json({ ok: true });
+  }));
+}
+
+crud('bugs', bugFields, [
+  'title',
+  'category',
+  'device',
+  'os',
+  'severity',
+  'priority',
+  'steps',
+  'expected',
+  'actual',
+]);
+crud('cases', caseFields, ['feature', 'objective', 'steps', 'expected']);
+
+api.post('/feedback', auth, asyncHandler(async (req, res) => {
+  const message = clean(req.body.message, 3000),
+    rating = Number(req.body.rating);
+  if (!message || !Number.isInteger(rating) || rating < 1 || rating > 5) {
+    return res.status(400).json({ message: 'Rating (1-5) and message required' });
+  }
+  res.status(201).json(await Feedback.create({ user: req.user._id, rating, message }));
+}));
+
+api.get('/feedback', auth, asyncHandler(async (req, res) => {
+  const feedback = await Feedback.find({ user: req.user._id }).sort({ createdAt: -1 }).lean();
+  res.json(feedback);
+}));
+
+api.post('/certificates/issue', auth, asyncHandler(async (req, res) => {
+  const [modules, bugs, cases] = await Promise.all([
+    Module.find({ published: true }).select('_id').lean(),
+    Bug.countDocuments({ user: req.user._id }),
+    TestCase.countDocuments({ user: req.user._id }),
+  ]);
+  const done = new Set(req.user.completedModules.map(String));
+  if (!modules.length || !modules.every((m) => done.has(String(m._id))) || !bugs || !cases) {
+    return res.status(403).json({
+      message: 'Complete all published modules and create at least one bug report and test case',
+    });
+  }
+  let cert = await Certificate.findOne({ user: req.user._id }).select('code issuedAt fileName').lean();
+  if (!cert) {
+    cert = await Certificate.create({
+      user: req.user._id,
+      code: 'GQA-' + crypto.randomBytes(7).toString('hex').toUpperCase(),
+    });
+  }
+  res.json(cert);
+}));
+
+api.get('/certificates/download', auth, asyncHandler(async (req, res) => {
+  const cert = await Certificate.findOne({ user: req.user._id }).select('+fileData fileName fileContentType');
+  if (!cert?.fileData) return res.status(404).json({ message: 'No uploaded certificate is available' });
+  res.type(cert.fileContentType || 'application/octet-stream');
+  res.attachment(cert.fileName || 'certificate');
+  res.send(cert.fileData);
+}));
+
+api.get(
+  '/certificates/verify/:code',
+  cacheMiddleware({ ttlSeconds: 1800, keyPrefix: 'cert' }),
+  asyncHandler(async (req, res) => {
+    const cert = await Certificate.findOne({ code: req.params.code })
+      .select('code issuedAt user')
+      .populate('user', 'name')
+      .lean();
+    if (!cert) return res.status(404).json({ message: 'Certificate not found' });
+    res.json({
+      code: cert.code,
+      learner: cert.user?.name,
+      issuedAt: cert.issuedAt,
+      course: 'Scope GT',
+      note: 'Course completion, not an accredited professional certification',
+    });
+  })
+);
+
+api.get('/admin/stats', auth, admin, asyncHandler(async (req, res) => {
+  const [learners, modules, bugs, cases, feedback, certificates] = await Promise.all([
+    User.countDocuments({ role: 'learner' }),
+    Module.countDocuments(),
+    Bug.countDocuments(),
+    TestCase.countDocuments(),
+    Feedback.countDocuments(),
+    Certificate.countDocuments(),
+  ]);
+  res.json({ learners, modules, bugs, cases, feedback, certificates });
+}));
+
+api.get('/admin/users', auth, admin, asyncHandler(async (req, res) => {
+  const users = await User.find({ role: 'learner' })
+    .sort({ createdAt: -1 })
+    .limit(500)
+    .select('-passwordHash')
+    .lean();
+  const certificates = await Certificate.find({ user: { $in: users.map((u) => u._id) } })
+    .select('user fileName issuedAt')
+    .lean();
+  const byUser = new Map(certificates.map((c) => [String(c.user), c]));
+  res.json(users.map((u) => ({ ...u, certificate: byUser.get(String(u._id)) || null })));
+}));
+
+api.patch('/admin/users/:id', auth, admin, asyncHandler(async (req, res) => {
+  const u = await User.findOne({ _id: req.params.id, role: 'learner' });
+  if (!u) return res.status(404).json({ message: 'Learner not found' });
+  if (typeof req.body.disabled === 'boolean') u.disabled = req.body.disabled;
+  await u.save();
+  res.json(safeUser(u));
+}));
+
+api.put(
+  '/admin/users/:id/certificate-file',
+  auth,
+  admin,
+  express.raw({ type: ['application/pdf', 'image/png', 'image/jpeg'], limit: '10mb' }),
+  asyncHandler(async (req, res) => {
+    if (!mongoose.isValidObjectId(req.params.id)) return res.status(400).json({ message: 'Invalid learner' });
+    const learner = await User.exists({ _id: req.params.id, role: 'learner' });
+    if (!learner) return res.status(404).json({ message: 'Learner not found' });
+    if (!Buffer.isBuffer(req.body) || !req.body.length) {
+      return res.status(400).json({ message: 'Choose a PDF, PNG, or JPEG certificate file' });
+    }
+    const contentType = req.get('content-type');
+    const suppliedName = decodeURIComponent(req.get('x-file-name') || 'certificate');
+    const fileName =
+      path.basename(suppliedName).replace(/[^a-zA-Z0-9._ -]/g, '_').slice(0, 150) || 'certificate';
+    const cert = await Certificate.findOneAndUpdate(
+      { user: req.params.id },
+      {
+        $set: { fileName, fileContentType: contentType, fileData: req.body },
+        $setOnInsert: { code: 'GQA-' + crypto.randomBytes(7).toString('hex').toUpperCase(), issuedAt: new Date() },
+      },
+      { new: true, upsert: true, setDefaultsOnInsert: true }
+    );
+    res.json({ code: cert.code, fileName: cert.fileName, issuedAt: cert.issuedAt });
+  })
+);
+
+for (const [pathPart, Model, allowed] of [
+  ['modules', Module, ['title', 'summary', 'explanation', 'example', 'activity', 'quiz', 'order', 'published']],
+  ['theory', Theory, ['tag', 'title', 'summary', 'meaning', 'importance', 'example', 'action', 'published']],
+]) {
+  api.post('/admin/' + pathPart, auth, admin, asyncHandler(async (req, res) => {
+    const data = Object.fromEntries(allowed.filter((k) => req.body[k] !== undefined).map((k) => [k, req.body[k]]));
+    const created = await Model.create(data);
+    await invalidateCachePattern(`${pathPart}:*`);
+    res.status(201).json(created);
+  }));
+
+  api.patch('/admin/' + pathPart + '/:id', auth, admin, asyncHandler(async (req, res) => {
+    const data = Object.fromEntries(allowed.filter((k) => req.body[k] !== undefined).map((k) => [k, req.body[k]]));
+    const v = await Model.findByIdAndUpdate(req.params.id, { $set: data }, { new: true, runValidators: true });
+    if (!v) return res.status(404).json({ message: 'Not found' });
+    await invalidateCachePattern(`${pathPart}:*`);
+    res.json(v);
+  }));
+
+  api.delete('/admin/' + pathPart + '/:id', auth, admin, asyncHandler(async (req, res) => {
+    const v = await Model.findByIdAndDelete(req.params.id);
+    if (!v) return res.status(404).json({ message: 'Not found' });
+    await invalidateCachePattern(`${pathPart}:*`);
+    res.json({ ok: true });
+  }));
+}
+
+for (const [key, Model] of [
+  ['bugs', Bug],
+  ['cases', TestCase],
+]) {
+  api.get('/admin/' + key, auth, admin, asyncHandler(async (req, res) => {
+    const items = await Model.find()
+      .populate('user', 'name email')
+      .sort({ createdAt: -1 })
+      .limit(500)
+      .lean();
+    res.json(items);
+  }));
+
+  api.patch('/admin/' + key + '/:id/review', auth, admin, asyncHandler(async (req, res) => {
+    if (!['submitted', 'reviewed', 'needs_changes'].includes(req.body.status)) {
+      return res.status(400).json({ message: 'Invalid review status' });
+    }
+    const d = await Model.findByIdAndUpdate(
+      req.params.id,
+      { $set: { status: req.body.status, reviewNote: clean(req.body.reviewNote, 1000) } },
+      { new: true }
+    );
+    if (!d) return res.status(404).json({ message: 'Not found' });
+    res.json(d);
+  }));
+}
+
+api.get('/admin/feedback', auth, admin, asyncHandler(async (req, res) => {
+  const items = await Feedback.find()
+    .populate('user', 'name email')
+    .sort({ createdAt: -1 })
+    .limit(500)
+    .lean();
+  res.json(items);
+}));
+
+api.patch('/admin/feedback/:id', auth, admin, asyncHandler(async (req, res) => {
+  const v = await Feedback.findByIdAndUpdate(
+    req.params.id,
+    { $set: { adminReply: clean(req.body.adminReply, 1000) } },
+    { new: true }
+  );
+  if (!v) return res.status(404).json({ message: 'Not found' });
+  res.json(v);
+}));
+
+api.get('/admin/certificates', auth, admin, asyncHandler(async (req, res) => {
+  const certs = await Certificate.find()
+    .populate('user', 'name email')
+    .sort({ issuedAt: -1 })
+    .limit(500)
+    .lean();
+  res.json(certs);
+}));
+
+api.use((req, res) => res.status(404).json({ message: 'API route not found' }));
+
+// Graceful Express error handler catching Mongoose/MongoDB timeout errors and returning 503
+app.use((err, req, res, next) => {
+  console.error(err);
+
+  // Check for MongoDB/Mongoose connection or query timeouts
+  const isMongoTimeout =
+    err.name === 'MongoServerSelectionError' ||
+    err.name === 'MongoTimeoutError' ||
+    err.name === 'MongooseError' && err.message?.includes('timed out') ||
+    err.name === 'MongoNetworkTimeoutError' ||
+    err.code === 50 || // ExceededTimeLimit
+    err.message?.includes('maxTimeMS');
+
+  if (isMongoTimeout) {
+    return res.status(503).json({
+      message: 'Database operation timed out or service temporarily unavailable. Please retry shortly.',
+    });
+  }
+
+  if (err.name === 'ValidationError' || err.name === 'CastError') {
+    return res.status(400).json({
+      message: err.code === 11000 ? 'Duplicate value' : err.name === 'ValidationError' ? err.message : 'Invalid request parameter',
+    });
+  }
+
+  res.status(500).json({
+    message: err.code === 11000 ? 'Duplicate value' : 'Request failed',
+  });
+});
+
+const root = path.dirname(fileURLToPath(import.meta.url));
+const dist = path.resolve(root, '../../client/dist');
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(dist));
+  app.get('*', (req, res) => res.sendFile(path.join(dist, 'index.html')));
+}
+
+// Connect to MongoDB with safe connection pooling and timeouts configured for AWS Lightsail + MongoDB Atlas M0
+const mongoUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/game_qa_academy';
+await mongoose.connect(mongoUri, {
+  maxPoolSize: 20,              // Keep well below Atlas M0 limit of 500 connections
+  minPoolSize: 2,               // Maintain warm connections
+  serverSelectionTimeoutMS: 5000,// Avoid hanging requests indefinitely during cluster failover
+  socketTimeoutMS: 45000,       // Close idle/stale sockets
+});
+
+const port = process.env.PORT || 5000;
+app.listen(port, () => console.log('Game QA API on port ' + port));
