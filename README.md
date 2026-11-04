@@ -73,7 +73,9 @@ If frontend and backend are hosted on different origins, configure cookies and C
 
 **Learner:** email/password accounts, profile editing, learning dashboard, lesson modules and completion, bug reports, test cases, editing/deleting own artifacts, portfolio JSON export, feedback, and server-issued verifiable completion certificates.
 
-**Admin:** overview metrics, learner enable/disable, read-only course content, submission review with notes/status, feedback replies, and certificate issuance with optional learner-visible remarks. Administrators can issue certificates regardless of learner progress; issuing again updates the remarks on the existing certificate.
+**Admin:** overview metrics, learner enable/disable, read-only course content, submission review with notes/status, feedback replies, and certificate issuance with optional learner-visible remarks. Administrators set and can update the certificate recipient name, independently of the learner profile name. Administrators can issue certificates regardless of learner progress.
+
+Existing certificates without an administrator-set recipient name remain unavailable for viewing and public verification until an administrator enters and saves the name in Learner Accounts. Learner certificate requests also require this approval. Previously issued certificate records and codes are retained.
 
 **Eligibility:** complete every course module, submit >=1 bug report, and submit >=1 test case. Certificate codes are generated and stored on the server. Certificates reflect course completion only, not an external accreditation.
 

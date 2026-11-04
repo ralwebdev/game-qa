@@ -1,13 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Download } from 'lucide-react';
 
-export default function CertificateView({ user }) {
+export default function CertificateView({ cert }) {
   const canvasRef = useRef(null);
   const [ready, setReady] = useState(false);
   const [error, setError] = useState(false);
-  const name = user?.name?.trim() || 'Academy Learner';
+  const name = cert?.recipientName?.trim() || '';
 
   useEffect(() => {
+    if (!name) return;
     let cancelled = false;
     setReady(false);
     setError(false);

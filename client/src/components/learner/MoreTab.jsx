@@ -48,7 +48,7 @@ export default function MoreTab({ user, setUser, dash, bugs, cases, feedback, go
   const handleIssueCert = () => {
     run(async () => {
       await post('/certificates/issue', {});
-      setNotice('Certificate issued! Scroll down to view and print your record.');
+      setNotice('Certificate requested. An administrator must set the recipient name.');
     });
   };
 
@@ -150,12 +150,12 @@ export default function MoreTab({ user, setUser, dash, bugs, cases, feedback, go
             <Award size={20} style={{ color: '#f59e0b' }} />
             <h2 style={{ margin: 0 }}>Certificate of Completion</h2>
           </div>
-          <span className={`badge ${dash?.certificate ? 'badge-success' : dash?.eligible ? 'badge-success' : 'badge-neutral'}`}>
-            {dash?.certificate ? 'Issued' : dash?.eligible ? 'Ready' : 'Requirements Incomplete'}
+          <span className={`badge ${dash?.certificate?.recipientName || (!dash?.certificate && dash?.eligible) ? 'badge-success' : 'badge-neutral'}`}>
+            {dash?.certificate?.recipientName ? 'Issued' : dash?.certificate ? 'Awaiting Name Approval' : dash?.eligible ? 'Ready' : 'Requirements Incomplete'}
           </span>
         </div>
 
-        {dash?.certificate ? (
+        {dash?.certificate?.recipientName ? (
           <>
             {dash.certificate.remarks && (
               <div className="certificate-remarks">
@@ -170,6 +170,8 @@ export default function MoreTab({ user, setUser, dash, bugs, cases, feedback, go
               cases={cases.length}
             />
           </>
+        ) : dash?.certificate ? (
+          <p className="text-muted">An administrator must set the certificate name before it can be viewed or downloaded.</p>
         ) : (
           <div>
             <p className="text-muted">
@@ -181,7 +183,7 @@ export default function MoreTab({ user, setUser, dash, bugs, cases, feedback, go
               disabled={!dash?.eligible}
               onClick={handleIssueCert}
             >
-              <Sparkles size={16} /> Issue My Certificate
+              <Sparkles size={16} /> Request Certificate
             </button>
           </div>
         )}

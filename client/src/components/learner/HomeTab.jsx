@@ -22,11 +22,12 @@ export default function HomeTab({ user, dash, modules, bugs, cases, go, run, set
   const nextModule = modules.find((m) => !completed.includes(m._id));
   const isEligible = dash?.eligible;
   const hasCertificate = !!dash?.certificate;
+  const certificateApproved = !!dash?.certificate?.recipientName;
 
   const handleIssueCertificate = () => {
     run(async () => {
       await post('/certificates/issue', {});
-      setNotice('Congratulations! Your Certificate of Completion has been issued.');
+      setNotice('Certificate requested. An administrator must set the recipient name.');
     });
   };
 
@@ -121,8 +122,8 @@ export default function HomeTab({ user, dash, modules, bugs, cases, go, run, set
             <Award size={20} style={{ color: hasCertificate || isEligible ? '#10b981' : '#94a3b8' }} />
             <h2 style={{ margin: 0 }}>Certificate of Completion</h2>
           </div>
-          <span className={`badge ${hasCertificate ? 'badge-success' : isEligible ? 'badge-success' : 'badge-neutral'}`}>
-            {hasCertificate ? 'Issued' : isEligible ? 'Ready to Issue' : 'In Progress'}
+          <span className={`badge ${certificateApproved || (!hasCertificate && isEligible) ? 'badge-success' : 'badge-neutral'}`}>
+            {certificateApproved ? 'Issued' : hasCertificate ? 'Awaiting Name Approval' : isEligible ? 'Ready to Request' : 'In Progress'}
           </span>
         </div>
 
@@ -173,7 +174,7 @@ export default function HomeTab({ user, dash, modules, bugs, cases, go, run, set
               className="btn primary"
               onClick={() => go('settings')}
             >
-              <Award size={16} /> View & Print Certificate
+              <Award size={16} /> {certificateApproved ? 'View & Print Certificate' : 'View Certificate Status'}
             </button>
           ) : (
             <button
@@ -182,7 +183,7 @@ export default function HomeTab({ user, dash, modules, bugs, cases, go, run, set
               disabled={!isEligible}
               onClick={handleIssueCertificate}
             >
-              <Sparkles size={16} /> Issue My Certificate
+              <Sparkles size={16} /> Request Certificate
             </button>
           )}
 

@@ -30,6 +30,7 @@ export default function AdminDashboard({ run, setNotice }) {
   const [reviewForms, setReviewForms] = useState({});
   const [replies, setReplies] = useState({});
   const [certificateRemarks, setCertificateRemarks] = useState({});
+  const [certificateNames, setCertificateNames] = useState({});
 
   useEffect(() => {
     Promise.all([
@@ -143,7 +144,7 @@ export default function AdminDashboard({ run, setNotice }) {
             <div>
               <h2 style={{ margin: 0 }}>Learner Accounts ({users.length})</h2>
               <p className="text-muted text-sm mt-1">
-                Issue certificates with optional learner-visible remarks or manage account access. Admin issuance does not require course completion.
+                Set the certificate name and issue certificates with optional learner-visible remarks. Only administrators can change certificate names.
               </p>
             </div>
           </div>
@@ -176,6 +177,15 @@ export default function AdminDashboard({ run, setNotice }) {
                     </td>
                     <td>
                       <div className="admin-certificate-action">
+                        <input
+                          className="form-control"
+                          type="text"
+                          maxLength={120}
+                          aria-label={`Certificate name for ${u.name}`}
+                          placeholder="Certificate recipient name"
+                          value={certificateNames[u._id] ?? u.certificate?.recipientName ?? ''}
+                          onChange={(event) => setCertificateNames((prev) => ({ ...prev, [u._id]: event.target.value }))}
+                        />
                         <textarea
                           className="form-control"
                           rows={2}
@@ -185,11 +195,11 @@ export default function AdminDashboard({ run, setNotice }) {
                           value={certificateRemarks[u._id] ?? u.certificate?.remarks ?? ''}
                           onChange={(event) => setCertificateRemarks((prev) => ({ ...prev, [u._id]: event.target.value }))}
                         />
-                        <button type="button" className="btn sm primary" onClick={() => run(async () => {
-                          await post(`/admin/users/${u._id}/certificate`, { remarks: certificateRemarks[u._id] ?? u.certificate?.remarks ?? '' });
-                          setNotice(u.certificate ? `Certificate remarks updated for ${u.name}.` : `Certificate issued to ${u.name}.`);
+                        <button type="button" className="btn sm primary" disabled={!(certificateNames[u._id] ?? u.certificate?.recipientName ?? '').trim()} onClick={() => run(async () => {
+                          await post(`/admin/users/${u._id}/certificate`, { recipientName: certificateNames[u._id] ?? u.certificate?.recipientName ?? '', remarks: certificateRemarks[u._id] ?? u.certificate?.remarks ?? '' });
+                          setNotice(u.certificate?.recipientName ? `Certificate updated for ${u.name}.` : `Certificate name approved for ${u.name}.`);
                         })}>
-                          <Award size={14} /> {u.certificate ? 'Save Remarks' : 'Issue Certificate'}
+                          <Award size={14} /> {u.certificate?.recipientName ? 'Update Certificate' : 'Issue Certificate'}
                         </button>
                       </div>
                     </td>
