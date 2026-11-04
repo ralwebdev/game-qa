@@ -2123,9 +2123,6 @@ select.form-control {
   animation: fadeIn 0.2s ease-out;
 }
 
-.learner-delete-section { margin: 18px 0; padding: 16px; border: 1px solid rgba(239, 68, 68, 0.35); border-radius: var(--radius-sm); }
-.learner-delete-section label { display: block; margin: 12px 0 6px; font-weight: 600; }
-.learner-delete-section .form-control { max-width: 360px; }
 
 .theory-concept-accordion {
   border: 1px solid var(--border-subtle);

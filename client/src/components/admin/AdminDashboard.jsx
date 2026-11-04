@@ -30,9 +30,6 @@ export default function AdminDashboard({ run, setNotice }) {
   const [certificates, setCertificates] = useState([]);
   const [reviewForms, setReviewForms] = useState({});
   const [replies, setReplies] = useState({});
-  const [deleteConfirmation, setDeleteConfirmation] = useState('');
-  const [showDeleteLearners, setShowDeleteLearners] = useState(false);
-  const [deletingLearners, setDeletingLearners] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -149,35 +146,6 @@ export default function AdminDashboard({ run, setNotice }) {
                 Upload verified PDF/PNG/JPEG completion files (max 10MB) or toggle account access.
               </p>
             </div>
-          </div>
-
-          <div className="learner-delete-section">
-            {!showDeleteLearners ? (
-              <button type="button" className="btn danger" disabled={!stats?.students} onClick={() => setShowDeleteLearners(true)}>
-                Delete all student accounts
-              </button>
-            ) : (
-              <div>
-                <h3>Delete {stats?.students ?? 0} student accounts?</h3>
-                <p className="text-muted text-sm">This permanently deletes accounts with the Student learner type and their bug reports, test cases, feedback, and certificates. Other learner types and administrators remain. Deletion may be partial if an error occurs.</p>
-                <label htmlFor="delete-learners-confirmation">Type DELETE STUDENTS to confirm</label>
-                <input id="delete-learners-confirmation" className="form-control" value={deleteConfirmation} onChange={(event) => setDeleteConfirmation(event.target.value)} autoComplete="off" />
-                <div className="flex items-center gap-2 flex-wrap mt-3">
-                  <button type="button" className="btn danger" disabled={deletingLearners || deleteConfirmation !== 'DELETE STUDENTS' || !stats?.students} onClick={async () => {
-                    setDeletingLearners(true);
-                    try {
-                      await run(async () => {
-                        const result = await post('/admin/users/delete-students', { confirmation: deleteConfirmation, expectedCount: stats.students });
-                        setDeleteConfirmation('');
-                        setShowDeleteLearners(false);
-                        setNotice(`Deleted ${result.deleted} student accounts and their associated records.`);
-                      });
-                    } finally { setDeletingLearners(false); }
-                  }}>{deletingLearners ? 'Deleting…' : 'Delete all students'}</button>
-                  <button type="button" className="btn ghost" disabled={deletingLearners} onClick={() => { setDeleteConfirmation(''); setShowDeleteLearners(false); }}>Cancel</button>
-                </div>
-              </div>
-            )}
           </div>
 
           <div className="data-table-container">
