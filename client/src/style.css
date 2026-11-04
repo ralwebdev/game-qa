@@ -2120,6 +2120,12 @@ select.form-control {
   animation: fadeIn 0.2s ease-out;
 }
 
+.theory-concept-accordion {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0 14px;
+}
+.theory-concept-accordion[open] { padding-bottom: 14px; }
 .theory-concept-accordion summary {
   display: flex;
   align-items: center;
