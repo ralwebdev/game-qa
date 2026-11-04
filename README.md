@@ -57,15 +57,15 @@ If the app is managed by systemd instead, provide the service name:
 SYSTEMD_SERVICE=game-qa-academy ./deploy.sh
 ```
 
-Use `./deploy.sh --no-restart` to only install and build. The optional `--seed` flag runs `npm run seed --prefix server`; use it only when you deliberately want to apply the seed data.
+Use `./deploy.sh --no-restart` to only install and build. The optional `--seed` flag runs `npm run seed --prefix server`, which provisions the configured administrator if needed.
 
 ### Adding the student sessions
 
-The curriculum contains 22 individually completable modules based on the two student session PDFs, with theory content for each topic. The normal seed inserts missing records; it does not remove old content or overwrite existing records.
+The curriculum contains 22 individually completable modules based on the two student session PDFs. The server reads course and theory content from `server/src/modules.json` and `server/src/theory.json`; these files, not the database or admin editor, are the source of truth. Learner completion remains stored in MongoDB and follows the learner across devices.
 
-To replace an existing database's curriculum with the PDF modules, back up the database, configure the intended `MONGODB_URI`, and run `node src/replace-curriculum.js` from the `server` directory. This deletes other modules and all existing theory entries, including administrator-created content. Existing PDF module IDs are retained on repeated runs, but progress for removed modules no longer counts. Other learner records and issued certificates are not deleted. The operation is not transactional; restore the backup if it fails partway through. Theory slides are associated with modules by their `moduleLegacyId`.
+Before deploying this change to an existing database, back it up and run `node src/migrate-course-progress.js` from the `server` directory with the intended `MONGODB_URI`. This maps previous completion records to the file-based module IDs without deleting the original records. Run it before removing old module records; unmatched references cannot be mapped and are reported. The migration is safe to repeat. Theory slides are associated with modules by `moduleLegacyId`.
 
-The modules are published by default. Certificate eligibility requires completing every published module, so learners must complete all 22 modules before they can become eligible or request a certificate. Admins can unpublish modules in the content editor if they should not yet count toward eligibility.
+Certificate eligibility requires completing all 22 file-based modules, plus the existing bug report and test case requirements. Change course content in the application files and redeploy to publish changes.
 
 If frontend and backend are hosted on different origins, configure cookies and CSRF defense appropriately before production deployment; the supplied application assumes a same-origin reverse-proxy setup.
 
@@ -73,9 +73,9 @@ If frontend and backend are hosted on different origins, configure cookies and C
 
 **Learner:** email/password accounts, profile editing, learning dashboard, lesson modules and completion, bug reports, test cases, editing/deleting own artifacts, portfolio JSON export, feedback, and server-issued verifiable completion certificates.
 
-**Admin:** overview metrics, learner enable/disable, CRUD for modules and glossary, submission review with notes/status, feedback replies, and certificate register.
+**Admin:** overview metrics, learner enable/disable, read-only course content, submission review with notes/status, feedback replies, and certificate register.
 
-**Eligibility:** complete every currently published module, submit >=1 bug report, and submit >=1 test case. Certificate codes are generated and stored on the server. Certificates reflect course completion only, not an external accreditation.
+**Eligibility:** complete every course module, submit >=1 bug report, and submit >=1 test case. Certificate codes are generated and stored on the server. Certificates reflect course completion only, not an external accreditation.
 
 **Security foundations:** bcrypt password hashes, HttpOnly SameSite cookies carrying signed JWTs, per-request account lookup, authorization on all protected endpoints, learner ownership checks for artifacts, login rate limiting, Helmet, request body limits, and validation of required fields. This is a starter implementation, not a completed security audit.
 
@@ -88,7 +88,6 @@ If frontend and backend are hosted on different origins, configure cookies and C
 - `GET/POST /api/feedback`
 - `POST /api/certificates/issue`, `GET /api/certificates/verify/:code`
 - `GET /api/admin/stats`, `GET /api/admin/users`, `PATCH /api/admin/users/:id`
-- `POST/PATCH/DELETE /api/admin/modules`, `POST/PATCH/DELETE /api/admin/theory` (specific IDs for mutation routes)
 - `GET /api/admin/bugs`, `GET /api/admin/cases`, `PATCH /api/admin/:type/:id/review`
 - `GET /api/admin/feedback`, `PATCH /api/admin/feedback/:id`, `GET /api/admin/certificates`
 

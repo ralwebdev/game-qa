@@ -8,9 +8,6 @@ import {
   MessageSquare, 
   Award, 
   ShieldCheck, 
-  Plus, 
-  Edit3, 
-  Trash2, 
   Upload, 
   CheckCircle, 
   XCircle, 
@@ -19,7 +16,7 @@ import {
 import StatCard from '../common/StatCard';
 import Badge from '../common/Badge';
 import FormField from '../common/FormField';
-import { api, post, patch, del, uploadCertificate } from '../../services/api';
+import { api, post, patch, uploadCertificate } from '../../services/api';
 
 export default function AdminDashboard({ run, setNotice }) {
   const [tab, setTab] = useState('overview');
@@ -110,7 +107,6 @@ export default function AdminDashboard({ run, setNotice }) {
             className={`admin-tab-btn ${tab === key ? 'active' : ''}`}
             onClick={() => {
               setTab(key);
-              setEditing(null);
             }}
           >
             <Icon size={15} style={{ verticalAlign: 'middle', marginRight: 6 }} />
