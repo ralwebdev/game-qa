@@ -1,0 +1,450 @@
+{
+    "root_group": {
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {
+            "setup": {
+                "id": "5c0f8025f7e0b6654089e5b00e950f1a",
+                "groups": {},
+                "checks": {
+                        "login: HTTP 200": {
+                            "path": "::setup::login: HTTP 200",
+                            "id": "51292e9ebc08ba9567607aa7f69c761f",
+                            "passes": 1,
+                            "fails": 0,
+                            "name": "login: HTTP 200"
+                        },
+                        "login: JSON": {
+                            "id": "0cfce4fc9c6d498d371bb6ec449b5074",
+                            "passes": 1,
+                            "fails": 0,
+                            "name": "login: JSON",
+                            "path": "::setup::login: JSON"
+                        },
+                        "profile: HTTP 200": {
+                            "name": "profile: HTTP 200",
+                            "path": "::setup::profile: HTTP 200",
+                            "id": "320fa85f9635681585c55ec61fe5934f",
+                            "passes": 1,
+                            "fails": 0
+                        },
+                        "profile: JSON": {
+                            "fails": 0,
+                            "name": "profile: JSON",
+                            "path": "::setup::profile: JSON",
+                            "id": "23f72a9b37dfbebedc6d45a678d96fb1",
+                            "passes": 1
+                        },
+                        "dashboard: HTTP 200": {
+                            "name": "dashboard: HTTP 200",
+                            "path": "::setup::dashboard: HTTP 200",
+                            "id": "620b4ff4e53780d706d50151758a4ff8",
+                            "passes": 1,
+                            "fails": 0
+                        },
+                        "dashboard: JSON": {
+                            "passes": 1,
+                            "fails": 0,
+                            "name": "dashboard: JSON",
+                            "path": "::setup::dashboard: JSON",
+                            "id": "764c71eba6dd07c9267a35d1de339425"
+                        },
+                        "modules: HTTP 200": {
+                            "name": "modules: HTTP 200",
+                            "path": "::setup::modules: HTTP 200",
+                            "id": "cc52a5bed3a218df7e29afaeb9406201",
+                            "passes": 1,
+                            "fails": 0
+                        },
+                        "modules: JSON": {
+                            "path": "::setup::modules: JSON",
+                            "id": "e40f7d5774129f3884329fc96f17d393",
+                            "passes": 1,
+                            "fails": 0,
+                            "name": "modules: JSON"
+                        },
+                        "theory: HTTP 200": {
+                            "name": "theory: HTTP 200",
+                            "path": "::setup::theory: HTTP 200",
+                            "id": "e5f085ccf7c9cffc16139c9d76b42340",
+                            "passes": 1,
+                            "fails": 0
+                        },
+                        "theory: JSON": {
+                            "name": "theory: JSON",
+                            "path": "::setup::theory: JSON",
+                            "id": "06ef8eae2f2c79f672953680f74e2420",
+                            "passes": 1,
+                            "fails": 0
+                        },
+                        "bugs: HTTP 200": {
+                            "id": "d684145c7ca676e0feebd83c506cbaad",
+                            "passes": 1,
+                            "fails": 0,
+                            "name": "bugs: HTTP 200",
+                            "path": "::setup::bugs: HTTP 200"
+                        },
+                        "bugs: JSON": {
+                            "name": "bugs: JSON",
+                            "path": "::setup::bugs: JSON",
+                            "id": "d214d7f7d69973201b88692225e56d39",
+                            "passes": 1,
+                            "fails": 0
+                        },
+                        "cases: HTTP 200": {
+                            "name": "cases: HTTP 200",
+                            "path": "::setup::cases: HTTP 200",
+                            "id": "9d0dc0eeb58f73bd4fe057345b020502",
+                            "passes": 1,
+                            "fails": 0
+                        },
+                        "cases: JSON": {
+                            "name": "cases: JSON",
+                            "path": "::setup::cases: JSON",
+                            "id": "8caffab579d302df999c3a594cc23f74",
+                            "passes": 1,
+                            "fails": 0
+                        },
+                        "feedback: HTTP 200": {
+                            "passes": 1,
+                            "fails": 0,
+                            "name": "feedback: HTTP 200",
+                            "path": "::setup::feedback: HTTP 200",
+                            "id": "0f2d55769e53365d03d1628ee5f5c143"
+                        },
+                        "feedback: JSON": {
+                            "fails": 0,
+                            "name": "feedback: JSON",
+                            "path": "::setup::feedback: JSON",
+                            "id": "d1085b9b379eae6c46822cf48e00d2fc",
+                            "passes": 1
+                        }
+                    },
+                "name": "setup",
+                "path": "::setup"
+            }
+        },
+        "checks": {
+            "profile: HTTP 200": {
+                "name": "profile: HTTP 200",
+                "path": "::profile: HTTP 200",
+                "id": "088e9b8b3924641e11cf015da41f9360",
+                "passes": 525,
+                "fails": 0
+            },
+            "profile: JSON": {
+                "name": "profile: JSON",
+                "path": "::profile: JSON",
+                "id": "cd302dd60aaaa1a3842113d66db6d776",
+                "passes": 525,
+                "fails": 0
+            },
+            "dashboard: HTTP 200": {
+                "id": "dc0b5e19bd615aea997c210243ec38f4",
+                "passes": 525,
+                "fails": 0,
+                "name": "dashboard: HTTP 200",
+                "path": "::dashboard: HTTP 200"
+            },
+            "dashboard: JSON": {
+                "name": "dashboard: JSON",
+                "path": "::dashboard: JSON",
+                "id": "e2e74ebc91c84c3cf57e9eebd1854bac",
+                "passes": 525,
+                "fails": 0
+            },
+            "modules: HTTP 200": {
+                "name": "modules: HTTP 200",
+                "path": "::modules: HTTP 200",
+                "id": "75185bf3ff8aebb7bc45f909d5ec4f52",
+                "passes": 525,
+                "fails": 0
+            },
+            "modules: JSON": {
+                "name": "modules: JSON",
+                "path": "::modules: JSON",
+                "id": "a03ba6f50d65f2e06be5165ec73f184c",
+                "passes": 525,
+                "fails": 0
+            },
+            "theory: HTTP 200": {
+                "name": "theory: HTTP 200",
+                "path": "::theory: HTTP 200",
+                "id": "10a22f23f0d78b7be4b2ac8248b2aee3",
+                "passes": 525,
+                "fails": 0
+            },
+            "theory: JSON": {
+                "name": "theory: JSON",
+                "path": "::theory: JSON",
+                "id": "dc9e3b77c335e2eb2bf64ddd620bc223",
+                "passes": 525,
+                "fails": 0
+            },
+            "bugs: HTTP 200": {
+                "fails": 0,
+                "name": "bugs: HTTP 200",
+                "path": "::bugs: HTTP 200",
+                "id": "f2f705f75b8e61ec2cfb6797b3fe276b",
+                "passes": 525
+            },
+            "bugs: JSON": {
+                "fails": 0,
+                "name": "bugs: JSON",
+                "path": "::bugs: JSON",
+                "id": "77551fc2e0d5ecfa7ef9cf37f268b3de",
+                "passes": 525
+            },
+            "cases: HTTP 200": {
+                "fails": 0,
+                "name": "cases: HTTP 200",
+                "path": "::cases: HTTP 200",
+                "id": "35e026aae78cc8d67b8c2b343396d42d",
+                "passes": 525
+            },
+            "cases: JSON": {
+                "passes": 525,
+                "fails": 0,
+                "name": "cases: JSON",
+                "path": "::cases: JSON",
+                "id": "66fd54ab2ed5b1b681ccb005e02f9e2b"
+            },
+            "feedback: HTTP 200": {
+                "id": "33fc6e4793312103be2f5a28861165bd",
+                "passes": 525,
+                "fails": 0,
+                "name": "feedback: HTTP 200",
+                "path": "::feedback: HTTP 200"
+            },
+            "feedback: JSON": {
+                "name": "feedback: JSON",
+                "path": "::feedback: JSON",
+                "id": "abf11985919e9c5fd9b515a8d08952ea",
+                "passes": 525,
+                "fails": 0
+            }
+        },
+        "name": "",
+        "path": ""
+    },
+    "metrics": {
+        "http_req_connecting": {
+            "avg": 0.5314425196850393,
+            "med": 0,
+            "p(90)": 0,
+            "p(95)": 0,
+            "p(99)": 36.71897,
+            "min": 0,
+            "max": 43.4426
+        },
+        "data_sent": {
+            "count": 1248124,
+            "rate": 6527.812422899675
+        },
+        "http_req_duration{endpoint:profile}": {
+            "avg": 41.59663003802282,
+            "med": 41.2244,
+            "p(90)": 45.2182,
+            "p(95)": 46.147525,
+            "p(99)": 54.4844,
+            "min": 36.2906,
+            "max": 75.9111,
+            "thresholds": {
+                "p(95)<2000": false
+            }
+        },
+        "vus_max": {
+            "value": 50,
+            "min": 50,
+            "max": 50
+        },
+        "http_req_receiving": {
+            "med": 0,
+            "p(90)": 0.7558600000000008,
+            "p(95)": 0.8675399999999999,
+            "p(99)": 1.0929219999999995,
+            "min": 0,
+            "max": 1.712,
+            "avg": 0.21932720608199835
+        },
+        "data_received": {
+            "count": 11563170,
+            "rate": 60476.526990988736
+        },
+        "http_reqs": {
+            "count": 3683,
+            "rate": 19.262455616220425
+        },
+        "http_req_failed": {
+            "passes": 0,
+            "fails": 3683,
+            "thresholds": {
+                "rate<0.01": false,
+                "rate<0.10": false
+            },
+            "value": 0
+        },
+        "http_req_duration{endpoint:bugs}": {
+            "p(99)": 56.951625,
+            "min": 37.5232,
+            "max": 59.6548,
+            "avg": 42.72676387832698,
+            "med": 42.3166,
+            "p(90)": 46.5492,
+            "p(95)": 47.857575,
+            "thresholds": {
+                "p(95)<2000": false
+            }
+        },
+        "http_req_duration{expected_response:true}": {
+            "min": 36.2906,
+            "max": 399.0454,
+            "avg": 43.72719046972571,
+            "med": 42.8629,
+            "p(90)": 47.696000000000005,
+            "p(95)": 49.78394999999997,
+            "p(99)": 59.263821999999976
+        },
+        "iteration_duration": {
+            "med": 14417.3704,
+            "p(90)": 16275.50024,
+            "p(95)": 16828.84978,
+            "p(99)": 17804.922359999997,
+            "min": 10194.9341,
+            "max": 18606.7044,
+            "avg": 14397.763586095236
+        },
+        "checks": {
+            "passes": 7366,
+            "fails": 0,
+            "thresholds": {
+                "rate>0.99": false
+            },
+            "value": 1
+        },
+        "http_req_duration{endpoint:cases}": {
+            "max": 67.8039,
+            "avg": 42.92386273764259,
+            "med": 42.47605,
+            "p(90)": 46.61525,
+            "p(95)": 48.88655,
+            "p(99)": 56.714475,
+            "min": 37.1521,
+            "thresholds": {
+                "p(95)<2000": false
+            }
+        },
+        "http_req_waiting": {
+            "p(99)": 59.051551999999965,
+            "min": 36.0923,
+            "max": 399.0454,
+            "avg": 43.501302769481335,
+            "med": 42.6407,
+            "p(90)": 47.43986,
+            "p(95)": 49.50423999999998
+        },
+        "http_req_sending": {
+            "p(90)": 0,
+            "p(95)": 0,
+            "p(99)": 0.5077519999999998,
+            "min": 0,
+            "max": 0.7763,
+            "avg": 0.006560494162367636,
+            "med": 0
+        },
+        "http_req_duration{endpoint:feedback}": {
+            "max": 71.4504,
+            "avg": 42.953073193916346,
+            "med": 42.44215,
+            "p(90)": 46.79045,
+            "p(95)": 49.442375,
+            "p(99)": 57.6828,
+            "min": 37.5234,
+            "thresholds": {
+                "p(95)<2000": false
+            }
+        },
+        "http_req_blocked": {
+            "min": 0,
+            "max": 116.1638,
+            "avg": 1.2101145805050224,
+            "med": 0,
+            "p(90)": 0,
+            "p(95)": 0,
+            "p(99)": 83.58934599999995
+        },
+        "http_req_duration": {
+            "p(90)": 47.696000000000005,
+            "p(95)": 49.78394999999997,
+            "p(99)": 59.263821999999976,
+            "min": 36.2906,
+            "max": 399.0454,
+            "avg": 43.72719046972571,
+            "med": 42.8629,
+            "thresholds": {
+                "p(95)<2000": false,
+                "p(99)<4000": false
+            }
+        },
+        "http_req_duration{endpoint:theory}": {
+            "p(99)": 62.83425,
+            "min": 39.076,
+            "max": 66.829,
+            "avg": 45.24474866920151,
+            "med": 44.6062,
+            "p(90)": 49.06375,
+            "p(95)": 52.215900000000005,
+            "thresholds": {
+                "p(95)<2000": false
+            }
+        },
+        "http_req_duration{endpoint:dashboard}": {
+            "min": 39.8132,
+            "max": 95.1017,
+            "avg": 45.45530019011409,
+            "med": 44.825199999999995,
+            "p(90)": 48.80535,
+            "p(95)": 50.9936,
+            "p(99)": 59.93185,
+            "thresholds": {
+                "p(95)<2000": false
+            }
+        },
+        "http_req_tls_handshaking": {
+            "avg": 0.6742484387727397,
+            "med": 0,
+            "p(90)": 0,
+            "p(95)": 0,
+            "p(99)": 45.807025999999915,
+            "min": 0,
+            "max": 68.8007
+        },
+        "vus": {
+            "value": 1,
+            "min": 1,
+            "max": 50
+        },
+        "http_req_duration{endpoint:modules}": {
+            "p(99)": 60.145450000000004,
+            "min": 39.1307,
+            "max": 99.7359,
+            "avg": 44.51444467680608,
+            "med": 43.810900000000004,
+            "p(90)": 47.95875,
+            "p(95)": 51.981225,
+            "thresholds": {
+                "p(95)<2000": false
+            }
+        },
+        "response_status": {
+            "count": 3683,
+            "rate": 19.262455616220425
+        },
+        "iterations": {
+            "count": 525,
+            "rate": 2.745802117435711
+        }
+    },
+    "setup_data": {
+        "cookie": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2YWU1OGVjY2RjM2NhOWViNDc3OWZmYjMiLCJyb2xlIjoibGVhcm5lciIsImlhdCI6MTc5MzQzMjcxMSwiZXhwIjoxNzkzNjA1NTExfQ.HLOTT7qEErLoPqUcthkxxkMb4-oPGlA63PO_gUshw5c"
+    }
+}

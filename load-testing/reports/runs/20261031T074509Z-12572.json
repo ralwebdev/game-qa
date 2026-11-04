@@ -1,0 +1,193 @@
+{
+  "project": "Game QA Academy MERN",
+  "generated_at_utc": "2026-10-31T07:48:21.054997+00:00",
+  "environment": "production",
+  "scenario": "high",
+  "k6_exit_code": 0,
+  "server_specification": "Lightsail 2 GB RAM (assumed; verify)",
+  "sample_window_seconds": 190.684149,
+  "observed_peak_vus": 50,
+  "results": {
+    "http_requests": {
+      "count": 3683,
+      "rate": 19.262455616220425
+    },
+    "latency_ms": {
+      "p(90)": 47.696000000000005,
+      "p(95)": 49.78394999999997,
+      "p(99)": 59.263821999999976,
+      "min": 36.2906,
+      "max": 399.0454,
+      "avg": 43.72719046972571,
+      "med": 42.8629,
+      "thresholds": {
+        "p(95)<2000": false,
+        "p(99)<4000": false
+      }
+    },
+    "failure_rate": {
+      "passes": 0,
+      "fails": 3683,
+      "thresholds": {
+        "rate<0.01": false,
+        "rate<0.10": false
+      },
+      "value": 0
+    },
+    "checks": {
+      "passes": 7366,
+      "fails": 0,
+      "thresholds": {
+        "rate>0.99": false
+      },
+      "value": 1
+    },
+    "status_codes": {
+      "200": 3683
+    },
+    "endpoint_latency_ms": {
+      "http_req_duration{endpoint:profile}": {
+        "avg": 41.59663003802282,
+        "med": 41.2244,
+        "p(90)": 45.2182,
+        "p(95)": 46.147525,
+        "p(99)": 54.4844,
+        "min": 36.2906,
+        "max": 75.9111,
+        "thresholds": {
+          "p(95)<2000": false
+        }
+      },
+      "http_req_duration{endpoint:bugs}": {
+        "p(99)": 56.951625,
+        "min": 37.5232,
+        "max": 59.6548,
+        "avg": 42.72676387832698,
+        "med": 42.3166,
+        "p(90)": 46.5492,
+        "p(95)": 47.857575,
+        "thresholds": {
+          "p(95)<2000": false
+        }
+      },
+      "http_req_duration{endpoint:cases}": {
+        "max": 67.8039,
+        "avg": 42.92386273764259,
+        "med": 42.47605,
+        "p(90)": 46.61525,
+        "p(95)": 48.88655,
+        "p(99)": 56.714475,
+        "min": 37.1521,
+        "thresholds": {
+          "p(95)<2000": false
+        }
+      },
+      "http_req_duration{endpoint:feedback}": {
+        "max": 71.4504,
+        "avg": 42.953073193916346,
+        "med": 42.44215,
+        "p(90)": 46.79045,
+        "p(95)": 49.442375,
+        "p(99)": 57.6828,
+        "min": 37.5234,
+        "thresholds": {
+          "p(95)<2000": false
+        }
+      },
+      "http_req_duration{endpoint:theory}": {
+        "p(99)": 62.83425,
+        "min": 39.076,
+        "max": 66.829,
+        "avg": 45.24474866920151,
+        "med": 44.6062,
+        "p(90)": 49.06375,
+        "p(95)": 52.215900000000005,
+        "thresholds": {
+          "p(95)<2000": false
+        }
+      },
+      "http_req_duration{endpoint:dashboard}": {
+        "min": 39.8132,
+        "max": 95.1017,
+        "avg": 45.45530019011409,
+        "med": 44.825199999999995,
+        "p(90)": 48.80535,
+        "p(95)": 50.9936,
+        "p(99)": 59.93185,
+        "thresholds": {
+          "p(95)<2000": false
+        }
+      },
+      "http_req_duration{endpoint:modules}": {
+        "p(99)": 60.145450000000004,
+        "min": 39.1307,
+        "max": 99.7359,
+        "avg": 44.51444467680608,
+        "med": 43.810900000000004,
+        "p(90)": 47.95875,
+        "p(95)": 51.981225,
+        "thresholds": {
+          "p(95)<2000": false
+        }
+      }
+    }
+  },
+  "thresholds": {
+    "http_req_duration{endpoint:profile}": {
+      "p(95)<2000": false
+    },
+    "http_req_failed": {
+      "rate<0.01": false,
+      "rate<0.10": false
+    },
+    "http_req_duration{endpoint:bugs}": {
+      "p(95)<2000": false
+    },
+    "checks": {
+      "rate>0.99": false
+    },
+    "http_req_duration{endpoint:cases}": {
+      "p(95)<2000": false
+    },
+    "http_req_duration{endpoint:feedback}": {
+      "p(95)<2000": false
+    },
+    "http_req_duration": {
+      "p(95)<2000": false,
+      "p(99)<4000": false
+    },
+    "http_req_duration{endpoint:theory}": {
+      "p(95)<2000": false
+    },
+    "http_req_duration{endpoint:dashboard}": {
+      "p(95)<2000": false
+    },
+    "http_req_duration{endpoint:modules}": {
+      "p(95)<2000": false
+    }
+  },
+  "failed_threshold_metrics": [
+    "http_req_duration{endpoint:profile}",
+    "http_req_failed",
+    "http_req_duration{endpoint:bugs}",
+    "checks",
+    "http_req_duration{endpoint:cases}",
+    "http_req_duration{endpoint:feedback}",
+    "http_req_duration",
+    "http_req_duration{endpoint:theory}",
+    "http_req_duration{endpoint:dashboard}",
+    "http_req_duration{endpoint:modules}"
+  ],
+  "infrastructure": {},
+  "findings_and_recommendations": [
+    "High priority: thresholds failed for http_req_duration{endpoint:profile}, http_req_failed, http_req_duration{endpoint:bugs}, checks, http_req_duration{endpoint:cases}, http_req_duration{endpoint:feedback}, http_req_duration, http_req_duration{endpoint:theory}, http_req_duration{endpoint:dashboard}, http_req_duration{endpoint:modules}; correlate endpoint timing, status codes and telemetry before changing configuration.",
+    "Correlate slow endpoints with Atlas query and connection metrics, Node event-loop telemetry, Nginx logs and network timings; these sources are not measured by HTTP latency alone."
+  ],
+  "capacity_assessment": "Not established from one report. Compare complete representative steady-state runs at each concurrency, threshold outcomes, and correlated telemetry. VUs are not requests per second; a short ramp does not prove sustained capacity.",
+  "limitations": [
+    "Preflight login and endpoint checks contribute to aggregates.",
+    "Sample-window duration can differ from the configured stage duration.",
+    "Host CSV must be aligned to the run; CPU burst, Atlas and event-loop data are not automatically included.",
+    "An interrupted or partial run cannot establish capacity."
+  ]
+}
