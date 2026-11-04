@@ -17,6 +17,16 @@ import { post } from '../../services/api';
 import { useSearchParams } from 'react-router-dom';
 import TheoryTab from './TheoryTab';
 
+function pdfForModule(legacyId) {
+  if (legacyId >= 101 && legacyId <= 114) {
+    return { session: 1, page: legacyId - 99 };
+  }
+  if (legacyId >= 115 && legacyId <= 122) {
+    return { session: 2, page: legacyId - 112 };
+  }
+  return null;
+}
+
 export default function CourseTab({ modules, theory, user, setUser, run, setNotice }) {
   const completed = user?.completedModules || [];
   const [openQuizAnswers, setOpenQuizAnswers] = useState({});
@@ -273,6 +283,9 @@ export default function CourseTab({ modules, theory, user, setUser, run, setNoti
                 const relatedTheory = theory.filter(
                   (item) => item.moduleLegacyId === m.legacyId || (item.title && m.title && item.title.trim().toLowerCase() === m.title.trim().toLowerCase())
                 );
+                const pdf = pdfForModule(m.legacyId);
+                const pdfUrl = pdf && `${import.meta.env.BASE_URL}course-materials/session-${pdf.session}-page-${pdf.page}.pdf`;
+                const slideUrl = pdf && `${import.meta.env.BASE_URL}slides/session-${pdf.session}/slide-${String(pdf.page).padStart(2, '0')}.webp`;
 
                 return (
                   <div
@@ -325,6 +338,18 @@ export default function CourseTab({ modules, theory, user, setUser, run, setNoti
                     {/* Expanded Lesson Content */}
                     {isOpen && (
                       <div className="lesson-expanded-content">
+                        {pdf && (
+                          <div className="lesson-section">
+                            <div className="lesson-section-header">
+                              <BookOpen size={15} style={{ color: '#a3e635' }} />
+                              <span>Session {pdf.session} · Slide {pdf.page}</span>
+                            </div>
+                            <img className="lesson-slide-image" src={slideUrl} alt={`Session ${pdf.session}, slide ${pdf.page}: ${m.title}`} loading="lazy" />
+                            <a className="btn ghost sm" href={pdfUrl} target="_blank" rel="noreferrer">
+                              Open this slide as PDF
+                            </a>
+                          </div>
+                        )}
                         {/* 1. Related Theory Slides */}
                         {relatedTheory.length > 0 && (
                           <div className="lesson-section">

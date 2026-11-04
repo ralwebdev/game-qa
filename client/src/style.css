@@ -2073,6 +2073,15 @@ select.form-control {
   animation: fadeIn 0.2s ease-out;
 }
 
+.lesson-slide-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+}
+
 .lesson-section {
   margin-bottom: 18px;
 }
