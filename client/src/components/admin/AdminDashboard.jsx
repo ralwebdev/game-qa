@@ -19,7 +19,6 @@ import {
 import StatCard from '../common/StatCard';
 import Badge from '../common/Badge';
 import FormField from '../common/FormField';
-import ContentEditor from './ContentEditor';
 import { api, post, patch, del, uploadCertificate } from '../../services/api';
 
 export default function AdminDashboard({ run, setNotice }) {
@@ -32,7 +31,6 @@ export default function AdminDashboard({ run, setNotice }) {
   const [cases, setCases] = useState([]);
   const [feedback, setFeedback] = useState([]);
   const [certificates, setCertificates] = useState([]);
-  const [editing, setEditing] = useState(null);
   const [reviewForms, setReviewForms] = useState({});
   const [replies, setReplies] = useState({});
 
@@ -59,27 +57,6 @@ export default function AdminDashboard({ run, setNotice }) {
       })
       .catch(console.error);
   }, []);
-
-  const handleSaveContent = async (type, item) => {
-    run(async () => {
-      if (item._id) {
-        await patch(`/admin/${type}/${item._id}`, item);
-      } else {
-        await post(`/admin/${type}`, item);
-      }
-      setEditing(null);
-      setNotice('Content updated successfully');
-    });
-  };
-
-  const handleDeleteContent = (type, id) => {
-    if (window.confirm('Are you sure you want to delete this permanently?')) {
-      run(async () => {
-        await del(`/admin/${type}/${id}`);
-        setNotice('Content deleted');
-      });
-    }
-  };
 
   const handleSaveReview = (type, id) => {
     const data = reviewForms[id];
@@ -116,7 +93,7 @@ export default function AdminDashboard({ run, setNotice }) {
         <div>
           <h1 className="page-title">Academy Administration Portal</h1>
           <p className="page-subtitle">
-            Curriculum authoring, learner accounts, certificate issuance, and defect review queues.
+            Learner accounts, course content, certificate issuance, and defect review queues.
           </p>
         </div>
         <span className="badge badge-major font-mono">
@@ -252,26 +229,10 @@ export default function AdminDashboard({ run, setNotice }) {
                 {tab === 'modules' ? 'Course Curriculum Modules' : 'Theory & Glossary Terms'}
               </h2>
               <p className="text-muted text-sm">
-                Add, revise, or reorder curriculum lessons and testing concepts.
+                Course content is maintained in the application files.
               </p>
             </div>
-            <button
-              type="button"
-              className="btn primary"
-              onClick={() => setEditing({ _new: true })}
-            >
-              <Plus size={16} /> Add {tab === 'modules' ? 'Module' : 'Glossary Entry'}
-            </button>
           </div>
-
-          {editing && (
-            <ContentEditor
-              type={tab}
-              item={editing._new ? {} : editing}
-              onCancel={() => setEditing(null)}
-              onSave={(data) => handleSaveContent(tab, data)}
-            />
-          )}
 
           <div style={{ display: 'grid', gap: 14 }}>
             {(tab === 'modules' ? modules : theory).map((item) => (
@@ -288,22 +249,7 @@ export default function AdminDashboard({ run, setNotice }) {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      className="btn sm"
-                      onClick={() => setEditing(item)}
-                    >
-                      <Edit3 size={14} /> Edit
-                    </button>
-                    <button
-                      type="button"
-                      className="btn sm danger"
-                      onClick={() => handleDeleteContent(tab, item._id)}
-                    >
-                      <Trash2 size={14} /> Delete
-                    </button>
-                  </div>
+
                 </div>
               </div>
             ))}

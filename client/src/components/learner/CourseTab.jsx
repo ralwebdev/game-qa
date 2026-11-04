@@ -4,6 +4,8 @@ import {
   BookOpen, 
   ChevronDown, 
   ChevronUp, 
+  ChevronLeft,
+  ChevronRight,
   HelpCircle, 
   Sparkles, 
   Code2, 
@@ -85,24 +87,22 @@ export default function CourseTab({ modules, theory, user, setUser, run, setNoti
     );
   });
 
+  const selectedModuleIndex = Math.max(0, filteredModules.findIndex((module) => module._id === searchParams.get('module')));
+  const selectedModule = filteredModules[selectedModuleIndex];
+  const navigateModule = (index) => {
+    const module = filteredModules[index];
+    if (!module) return;
+    const params = new URLSearchParams(searchParams);
+    params.set('module', module._id);
+    setSearchParams(params);
+  };
+
   // Toggle single module accordion
   const toggleLesson = (id) => {
     setOpenLessons((prev) => ({
       ...prev,
-      [id]: !prev[id]
+      [id]: prev[id] === undefined ? false : !prev[id]
     }));
-  };
-
-  // Expand / collapse all modules in the current session
-  const anyOpen = filteredModules.some((module) => openLessons[module._id]);
-  const toggleAllLessons = () => {
-    if (anyOpen) {
-      setOpenLessons({});
-    } else {
-      const next = {};
-      filteredModules.forEach((m) => { next[m._id] = true; });
-      setOpenLessons(next);
-    }
   };
 
   const toggleQuizAnswer = (moduleId) => {
@@ -254,25 +254,6 @@ export default function CourseTab({ modules, theory, user, setUser, run, setNoti
                 </button>
               </div>
 
-              {filteredModules.length > 0 && (
-                <button
-                  type="button"
-                  className="btn ghost sm course-expand-all"
-                  style={{ fontSize: '0.78rem', whiteSpace: 'nowrap' }}
-                  onClick={toggleAllLessons}
-                  title="Expand or collapse all modules on this screen"
-                >
-                  {anyOpen ? (
-                    <>
-                      <ChevronUp size={14} /> Collapse All
-                    </>
-                  ) : (
-                    <>
-                      <ChevronDown size={14} /> Expand All
-                    </>
-                  )}
-                </button>
-              )}
             </div>
           </div>
 
@@ -297,10 +278,10 @@ export default function CourseTab({ modules, theory, user, setUser, run, setNoti
                 </button>
               </div>
             ) : (
-              filteredModules.map((m, index) => {
+              [selectedModule].map((m) => {
                 const isDone = completed.includes(m._id);
                 const isAnswerRevealed = !!openQuizAnswers[m._id];
-                const isOpen = !!openLessons[m._id];
+                const isOpen = openLessons[m._id] !== false;
                 const relatedTheory = theory.filter(
                   (item) => item.moduleLegacyId === m.legacyId || (item.title && m.title && item.title.trim().toLowerCase() === m.title.trim().toLowerCase())
                 );
@@ -322,7 +303,7 @@ export default function CourseTab({ modules, theory, user, setUser, run, setNoti
                             borderColor: isDone ? 'var(--primary)' : undefined
                           }}
                         >
-                          {String(m.order ?? index + 1).padStart(2, '0')}
+                          {String(m.order ?? selectedModuleIndex + 1).padStart(2, '0')}
                         </span>
                         <h3 className="module-card-title">
                           {m.title}
@@ -468,6 +449,17 @@ export default function CourseTab({ modules, theory, user, setUser, run, setNoti
               })
             )}
           </div>
+          {selectedModule && (
+            <nav className="course-module-navigation" aria-label="Module navigation">
+              <button type="button" className="btn ghost" disabled={selectedModuleIndex === 0} onClick={() => navigateModule(selectedModuleIndex - 1)}>
+                <ChevronLeft size={18} /> Previous
+              </button>
+              <span aria-live="polite">{selectedModuleIndex + 1} / {filteredModules.length}</span>
+              <button type="button" className="btn ghost" disabled={selectedModuleIndex === filteredModules.length - 1} onClick={() => navigateModule(selectedModuleIndex + 1)}>
+                Next <ChevronRight size={18} />
+              </button>
+            </nav>
+          )}
       <dialog className={`slide-viewer ${slideLandscape ? 'slide-viewer-landscape' : ''}`} ref={slideDialog} aria-labelledby="slide-viewer-title" onClose={() => setActiveSlide(null)}>
         {activeSlide && <>
           <div className="slide-viewer-header">
