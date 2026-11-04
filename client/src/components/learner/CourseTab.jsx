@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import {
-  CheckCircle2,
-  BookOpen,
-  ChevronDown,
-  ChevronUp,
-  HelpCircle,
-  Sparkles,
-  Code2,
+import { 
+  CheckCircle2, 
+  BookOpen, 
+  ChevronDown, 
+  ChevronUp, 
+  HelpCircle, 
+  Sparkles, 
+  Code2, 
   Flag,
   Search,
   X,
@@ -141,298 +141,298 @@ export default function CourseTab({ modules, theory, user, setUser, run, setNoti
 
       {/* Active Session Progress Banner */}
       <div className="course-hero-banner">
-        <div className="course-hero-header">
-          <div>
-            <h2 className="course-hero-title">
-              {session === 1
-                ? 'Session 1 • Foundations, Test Types & QA Pipeline'
-                : 'Session 2 • Mobile Bug Hunting, Reports & Portfolio'}
-            </h2>
-            <p className="course-hero-subtitle">
-              {session === 1
-                ? 'Learn what is a game, tester roles, QA pipeline, testing techniques, and salaries.'
-                : 'Master reporting anatomy, reproduction steps, device testing, and studio practice.'}
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className={`badge ${sessionProgressPercent === 100 ? 'badge-success' : 'badge-minor'}`}>
-              {currentCompleted} / {activeSessionModules.length} Done ({sessionProgressPercent}%)
-            </span>
-          </div>
-        </div>
+            <div className="course-hero-header">
+              <div>
+                <h2 className="course-hero-title">
+                  {session === 1
+                    ? 'Session 1 • Foundations, Test Types & QA Pipeline'
+                    : 'Session 2 • Mobile Bug Hunting, Reports & Portfolio'}
+                </h2>
+                <p className="course-hero-subtitle">
+                  {session === 1
+                    ? 'Learn what is a game, tester roles, QA pipeline, testing techniques, and salaries.'
+                    : 'Master reporting anatomy, reproduction steps, device testing, and studio practice.'}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={`badge ${sessionProgressPercent === 100 ? 'badge-success' : 'badge-minor'}`}>
+                  {currentCompleted} / {activeSessionModules.length} Done ({sessionProgressPercent}%)
+                </span>
+              </div>
+            </div>
 
-        {/* Visual Progress Bar */}
-        <div className="progress-track" aria-hidden="true" style={{ margin: '10px 0 6px' }}>
-          <div
-            className="progress-bar"
-            style={{ width: `${sessionProgressPercent}%` }}
-          />
-        </div>
-      </div>
-
-      {/* Controls: Mobile Search Bar & Status Filters */}
-      <div className="course-controls-row">
-        {/* Search Input */}
-        <div className="course-search-box">
-          <Search size={16} className="course-search-icon" />
-          <input
-            type="search"
-            className="form-control course-search-input"
-            aria-label="Filter session modules"
-            placeholder="Search modules (e.g., UI/UX, Bug Report, Salary)..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          {searchQuery && (
-            <button
-              type="button"
-              className="btn icon-only ghost"
-              aria-label="Clear search"
-              style={{ position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)', minHeight: 32, minWidth: 32, padding: 4 }}
-              onClick={() => setSearchQuery('')}
-            >
-              <X size={15} />
-            </button>
-          )}
-        </div>
-
-        {/* Status Filter & Accordion Toggle */}
-        <div className="flex items-center gap-2 justify-between flex-wrap">
-          <div className="course-status-filters" role="group" aria-label="Status filter">
-            <button
-              type="button"
-              className={`filter-pill ${statusFilter === 'all' ? 'active' : ''}`}
-              onClick={() => setStatusFilter('all')}
-            >
-              All ({activeSessionModules.length})
-            </button>
-            <button
-              type="button"
-              className={`filter-pill ${statusFilter === 'todo' ? 'active' : ''}`}
-              onClick={() => setStatusFilter('todo')}
-            >
-              To Do ({activeSessionModules.length - currentCompleted})
-            </button>
-            <button
-              type="button"
-              className={`filter-pill ${statusFilter === 'completed' ? 'active' : ''}`}
-              onClick={() => setStatusFilter('completed')}
-            >
-              Completed ({currentCompleted})
-            </button>
-          </div>
-
-          {filteredModules.length > 0 && (
-            <button
-              type="button"
-              className="btn ghost sm"
-              style={{ fontSize: '0.78rem', whiteSpace: 'nowrap' }}
-              onClick={toggleAllLessons}
-              title="Expand or collapse all modules on this screen"
-            >
-              {anyOpen ? (
-                <>
-                  <ChevronUp size={14} /> Collapse All
-                </>
-              ) : (
-                <>
-                  <ChevronDown size={14} /> Expand All
-                </>
-              )}
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Module Cards Grid */}
-      <div style={{ display: 'grid', gap: 14 }}>
-        {filteredModules.length === 0 ? (
-          <div className="card text-center" style={{ padding: '36px 20px' }}>
-            <p style={{ fontSize: '2rem', margin: '0 0 10px' }}>🔍</p>
-            <h3 style={{ marginBottom: 6 }}>No matching lessons found</h3>
-            <p className="text-muted text-sm" style={{ maxWidth: 420, margin: '0 auto 16px' }}>
-              No modules match &quot;{searchQuery}&quot; with the selected filter. Try clearing your search or switching filters.
-            </p>
-            <button
-              type="button"
-              className="btn ghost sm"
-              onClick={() => {
-                setSearchQuery('');
-                setStatusFilter('all');
-              }}
-            >
-              <RotateCcw size={14} /> Reset Filters
-            </button>
-          </div>
-        ) : (
-          filteredModules.map((m, index) => {
-            const isDone = completed.includes(m._id);
-            const isAnswerRevealed = !!openQuizAnswers[m._id];
-            const isOpen = !!openLessons[m._id];
-            const cleanSummary = (m.summary || '').replace(/\s*\?\s*/g, ' • ');
-            const relatedTheory = theory.filter(
-              (item) => item.moduleLegacyId === m.legacyId || (item.title && m.title && item.title.trim().toLowerCase() === m.title.trim().toLowerCase())
-            );
-
-            return (
+            {/* Visual Progress Bar */}
+            <div className="progress-track" aria-hidden="true" style={{ margin: '10px 0 6px' }}>
               <div
-                key={m._id}
-                className={`module-card ${isDone ? 'completed' : ''}`}
-              >
-                {/* Module Card Top Header */}
-                <div className="card-header-row">
-                  <div className="flex items-center gap-3" style={{ minWidth: 0, flex: 1 }}>
-                    <span
-                      className="module-index"
-                      style={{
-                        background: isDone ? 'rgba(16, 185, 129, 0.18)' : undefined,
-                        borderColor: isDone ? 'var(--primary)' : undefined
-                      }}
-                    >
-                      {String(m.order ?? index + 1).padStart(2, '0')}
-                    </span>
-                    <h3 className="module-card-title">
-                      {m.title}
-                    </h3>
-                  </div>
-                  <Badge
-                    text={isDone ? 'Completed' : 'Ready'}
-                    type={isDone ? 'success' : 'neutral'}
-                  />
-                </div>
+                className="progress-bar"
+                style={{ width: `${sessionProgressPercent}%` }}
+              />
+            </div>
+          </div>
 
-                {/* Brief Summary */}
-                {cleanSummary && (
-                  <p className="text-muted" style={{ fontSize: '0.88rem', margin: '6px 0 10px', lineHeight: 1.5 }}>
-                    {cleanSummary}
-                  </p>
-                )}
-
-                {/* Mobile-Friendly Accordion Trigger */}
+          {/* Controls: Mobile Search Bar & Status Filters */}
+          <div className="course-controls-row">
+            {/* Search Input */}
+            <div className="course-search-box">
+              <Search size={16} className="course-search-icon" />
+              <input
+                type="search"
+                className="form-control course-search-input"
+                aria-label="Filter session modules"
+                placeholder="Search modules (e.g., UI/UX, Bug Report, Salary)..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              {searchQuery && (
                 <button
                   type="button"
-                  className={`module-toggle-btn ${isOpen ? 'active' : ''}`}
-                  onClick={() => toggleLesson(m._id)}
-                  aria-expanded={isOpen}
+                  className="btn icon-only ghost"
+                  aria-label="Clear search"
+                  style={{ position: 'absolute', right: 6, top: '50%', transform: 'translateY(-50%)', minHeight: 32, minWidth: 32, padding: 4 }}
+                  onClick={() => setSearchQuery('')}
                 >
-                  <div className="flex items-center gap-2">
-                    <BookOpen size={16} />
-                    <span>{isOpen ? 'Close Lesson' : 'Open Lesson & Theory Slides'}</span>
-                  </div>
-                  {isOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                  <X size={15} />
                 </button>
+              )}
+            </div>
 
-                {/* Expanded Lesson Content */}
-                {isOpen && (
-                  <div className="lesson-expanded-content">
-                    {/* 1. Related Theory Slides */}
-                    {relatedTheory.length > 0 && (
-                      <div className="lesson-section">
-                        <div className="lesson-section-header">
-                          <BookOpen size={15} style={{ color: '#a3e635' }} />
-                          <span>Curriculum Theory Slide</span>
-                        </div>
-                        <TheoryTab theory={relatedTheory} embedded />
-                      </div>
-                    )}
+            {/* Status Filter & Accordion Toggle */}
+            <div className="flex items-center gap-2 justify-between flex-wrap">
+              <div className="course-status-filters" role="group" aria-label="Status filter">
+                <button
+                  type="button"
+                  className={`filter-pill ${statusFilter === 'all' ? 'active' : ''}`}
+                  onClick={() => setStatusFilter('all')}
+                >
+                  All ({activeSessionModules.length})
+                </button>
+                <button
+                  type="button"
+                  className={`filter-pill ${statusFilter === 'todo' ? 'active' : ''}`}
+                  onClick={() => setStatusFilter('todo')}
+                >
+                  To Do ({activeSessionModules.length - currentCompleted})
+                </button>
+                <button
+                  type="button"
+                  className={`filter-pill ${statusFilter === 'completed' ? 'active' : ''}`}
+                  onClick={() => setStatusFilter('completed')}
+                >
+                  Completed ({currentCompleted})
+                </button>
+              </div>
 
-                    {/* 2. Explanation & Core Principles */}
-                    {m.explanation && (
-                      <div className="lesson-section">
-                        <div className="lesson-section-header">
-                          <Sparkles size={15} style={{ color: '#10b981' }} />
-                          <span>Explanation &amp; Principles</span>
-                        </div>
-                        <div className="lesson-explanation-box">
-                          <p style={{ margin: 0 }}>{m.explanation}</p>
-                        </div>
-                      </div>
-                    )}
+              {filteredModules.length > 0 && (
+                <button
+                  type="button"
+                  className="btn ghost sm"
+                  style={{ fontSize: '0.78rem', whiteSpace: 'nowrap' }}
+                  onClick={toggleAllLessons}
+                  title="Expand or collapse all modules on this screen"
+                >
+                  {anyOpen ? (
+                    <>
+                      <ChevronUp size={14} /> Collapse All
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown size={14} /> Expand All
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+          </div>
 
-                    {/* 3. Worked Example / Scenario */}
-                    {m.example && (
-                      <div className="callout-box example">
-                        <div className="flex items-center gap-2 mb-1" style={{ color: '#06b6d4', fontWeight: 700 }}>
-                          <Code2 size={16} />
-                          <span>Worked Example / Studio Scenario</span>
-                        </div>
-                        <p style={{ margin: 0, whiteSpace: 'pre-line' }}>{m.example}</p>
-                      </div>
-                    )}
+          {/* Module Cards Grid */}
+          <div style={{ display: 'grid', gap: 14 }}>
+            {filteredModules.length === 0 ? (
+              <div className="card text-center" style={{ padding: '36px 20px' }}>
+                <p style={{ fontSize: '2rem', margin: '0 0 10px' }}>🔍</p>
+                <h3 style={{ marginBottom: 6 }}>No matching lessons found</h3>
+                <p className="text-muted text-sm" style={{ maxWidth: 420, margin: '0 auto 16px' }}>
+                  No modules match &quot;{searchQuery}&quot; with the selected filter. Try clearing your search or switching filters.
+                </p>
+                <button
+                  type="button"
+                  className="btn ghost sm"
+                  onClick={() => {
+                    setSearchQuery('');
+                    setStatusFilter('all');
+                  }}
+                >
+                  <RotateCcw size={14} /> Reset Filters
+                </button>
+              </div>
+            ) : (
+              filteredModules.map((m, index) => {
+                const isDone = completed.includes(m._id);
+                const isAnswerRevealed = !!openQuizAnswers[m._id];
+                const isOpen = !!openLessons[m._id];
+                const cleanSummary = (m.summary || '').replace(/\s*\?\s*/g, ' • ');
+                const relatedTheory = theory.filter(
+                  (item) => item.moduleLegacyId === m.legacyId || (item.title && m.title && item.title.trim().toLowerCase() === m.title.trim().toLowerCase())
+                );
 
-                    {/* 4. Practical Hands-On Exercise */}
-                    {m.activity && (
-                      <div className="callout-box activity">
-                        <div className="flex items-center gap-2 mb-1" style={{ color: '#f59e0b', fontWeight: 700 }}>
-                          <Flag size={16} />
-                          <span>Hands-On QA Exercise</span>
-                        </div>
-                        <p style={{ margin: 0 }}>{m.activity}</p>
-                      </div>
-                    )}
-
-                    {/* 5. Knowledge Self-Check */}
-                    {m.quiz?.q && (
-                      <div className="quiz-box">
-                        <div className="flex items-center gap-2 mb-2" style={{ color: '#84cc16', fontWeight: 700 }}>
-                          <HelpCircle size={16} />
-                          <span>Knowledge Self-Check</span>
-                        </div>
-                        <p style={{ fontWeight: 600, color: '#f8fafc', marginBottom: 10 }}>
-                          {m.quiz.q}
-                        </p>
-
-                        <button
-                          type="button"
-                          className="btn sm ghost quiz-reveal-btn"
-                          style={{ color: '#10b981', paddingLeft: 0 }}
-                          onClick={() => toggleQuizAnswer(m._id)}
+                return (
+                  <div
+                    key={m._id}
+                    className={`module-card ${isDone ? 'completed' : ''}`}
+                  >
+                    {/* Module Card Top Header */}
+                    <div className="card-header-row">
+                      <div className="flex items-center gap-3" style={{ minWidth: 0, flex: 1 }}>
+                        <span
+                          className="module-index"
+                          style={{
+                            background: isDone ? 'rgba(16, 185, 129, 0.18)' : undefined,
+                            borderColor: isDone ? 'var(--primary)' : undefined
+                          }}
                         >
-                          {isAnswerRevealed ? 'Hide Suggested Answer' : 'Reveal Suggested Answer'}
-                        </button>
+                          {String(m.order ?? index + 1).padStart(2, '0')}
+                        </span>
+                        <h3 className="module-card-title">
+                          {m.title}
+                        </h3>
+                      </div>
+                      <Badge
+                        text={isDone ? 'Completed' : 'Ready'}
+                        type={isDone ? 'success' : 'neutral'}
+                      />
+                    </div>
 
-                        {isAnswerRevealed && (
-                          <div className="quiz-answer-revealed">
-                            <strong>Suggested Answer:</strong> {m.quiz.a}
+                    {/* Brief Summary */}
+                    {cleanSummary && (
+                      <p className="text-muted" style={{ fontSize: '0.88rem', margin: '6px 0 10px', lineHeight: 1.5 }}>
+                        {cleanSummary}
+                      </p>
+                    )}
+
+                    {/* Mobile-Friendly Accordion Trigger */}
+                    <button
+                      type="button"
+                      className={`module-toggle-btn ${isOpen ? 'active' : ''}`}
+                      onClick={() => toggleLesson(m._id)}
+                      aria-expanded={isOpen}
+                    >
+                      <div className="flex items-center gap-2">
+                        <BookOpen size={16} />
+                        <span>{isOpen ? 'Close Lesson' : 'Open Lesson & Theory Slides'}</span>
+                      </div>
+                      {isOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                    </button>
+
+                    {/* Expanded Lesson Content */}
+                    {isOpen && (
+                      <div className="lesson-expanded-content">
+                        {/* 1. Related Theory Slides */}
+                        {relatedTheory.length > 0 && (
+                          <div className="lesson-section">
+                            <div className="lesson-section-header">
+                              <BookOpen size={15} style={{ color: '#a3e635' }} />
+                              <span>Curriculum Theory Slide</span>
+                            </div>
+                            <TheoryTab theory={relatedTheory} embedded />
                           </div>
                         )}
+
+                        {/* 2. Explanation & Core Principles */}
+                        {m.explanation && (
+                          <div className="lesson-section">
+                            <div className="lesson-section-header">
+                              <Sparkles size={15} style={{ color: '#10b981' }} />
+                              <span>Explanation &amp; Principles</span>
+                            </div>
+                            <div className="lesson-explanation-box">
+                              <p style={{ margin: 0 }}>{m.explanation}</p>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* 3. Worked Example / Scenario */}
+                        {m.example && (
+                          <div className="callout-box example">
+                            <div className="flex items-center gap-2 mb-1" style={{ color: '#06b6d4', fontWeight: 700 }}>
+                              <Code2 size={16} />
+                              <span>Worked Example / Studio Scenario</span>
+                            </div>
+                            <p style={{ margin: 0, whiteSpace: 'pre-line' }}>{m.example}</p>
+                          </div>
+                        )}
+
+                        {/* 4. Practical Hands-On Exercise */}
+                        {m.activity && (
+                          <div className="callout-box activity">
+                            <div className="flex items-center gap-2 mb-1" style={{ color: '#f59e0b', fontWeight: 700 }}>
+                              <Flag size={16} />
+                              <span>Hands-On QA Exercise</span>
+                            </div>
+                            <p style={{ margin: 0 }}>{m.activity}</p>
+                          </div>
+                        )}
+
+                        {/* 5. Knowledge Self-Check */}
+                        {m.quiz?.q && (
+                          <div className="quiz-box">
+                            <div className="flex items-center gap-2 mb-2" style={{ color: '#84cc16', fontWeight: 700 }}>
+                              <HelpCircle size={16} />
+                              <span>Knowledge Self-Check</span>
+                            </div>
+                            <p style={{ fontWeight: 600, color: '#f8fafc', marginBottom: 10 }}>
+                              {m.quiz.q}
+                            </p>
+
+                            <button
+                              type="button"
+                              className="btn sm ghost quiz-reveal-btn"
+                              style={{ color: '#10b981', paddingLeft: 0 }}
+                              onClick={() => toggleQuizAnswer(m._id)}
+                            >
+                              {isAnswerRevealed ? 'Hide Suggested Answer' : 'Reveal Suggested Answer'}
+                            </button>
+
+                            {isAnswerRevealed && (
+                              <div className="quiz-answer-revealed">
+                                <strong>Suggested Answer:</strong> {m.quiz.a}
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* 6. Lesson Bottom Action Bar */}
+                        <div className="lesson-bottom-actions">
+                          <button
+                            type="button"
+                            disabled={isDone}
+                            className={`btn primary ${isDone ? 'btn-completed' : ''}`}
+                            onClick={() => handleComplete(m._id)}
+                          >
+                            {isDone ? (
+                              <>
+                                <CheckCircle2 size={16} /> Module Completed
+                              </>
+                            ) : (
+                              <>
+                                <Sparkles size={16} /> Mark Module Complete
+                              </>
+                            )}
+                          </button>
+
+                          <button
+                            type="button"
+                            className="btn ghost sm"
+                            onClick={() => toggleLesson(m._id)}
+                          >
+                            <ChevronUp size={16} /> Close Lesson
+                          </button>
+                        </div>
                       </div>
                     )}
-
-                    {/* 6. Lesson Bottom Action Bar */}
-                    <div className="lesson-bottom-actions">
-                      <button
-                        type="button"
-                        disabled={isDone}
-                        className={`btn primary ${isDone ? 'btn-completed' : ''}`}
-                        onClick={() => handleComplete(m._id)}
-                      >
-                        {isDone ? (
-                          <>
-                            <CheckCircle2 size={16} /> Module Completed
-                          </>
-                        ) : (
-                          <>
-                            <Sparkles size={16} /> Mark Module Complete
-                          </>
-                        )}
-                      </button>
-
-                      <button
-                        type="button"
-                        className="btn ghost sm"
-                        onClick={() => toggleLesson(m._id)}
-                      >
-                        <ChevronUp size={16} /> Close Lesson
-                      </button>
-                    </div>
                   </div>
-                )}
-              </div>
-            );
-          })
-        )}
-      </div>
+                );
+              })
+            )}
+          </div>
     </div>
   );
 }
