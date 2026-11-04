@@ -116,5 +116,50 @@
     "importance": "Clear statuses provide team leads with real-time visibility into actual test velocity and bottlenecks.",
     "example": "If a door cannot be opened due to a missing key, any test case evaluating the dungeon behind it is marked 'Blocked'.",
     "action": "Never mark a test 'Pass' if you skipped any precondition or prerequisite step."
+  },
+  {
+    "id": "t13",
+    "tag": "concept",
+    "title": "Games and Gamification",
+    "summary": "Games use rules, objectives and feedback; gamification applies game elements to other activities.",
+    "meaning": "A game is structured play involving players, rules, objectives and feedback. Gamification applies elements such as points, badges or challenges in a non-game context.",
+    "example": "A training course awards badges for completing exercises; the course is gamified, even though it is not itself necessarily a game.",
+    "action": "Identify one game element in a learning or fitness app and describe the behavior it encourages."
+  },
+  {
+    "id": "t14",
+    "tag": "concept",
+    "title": "Functional Testing, UI/UX Testing and Playtesting",
+    "summary": "Different testing perspectives examine correctness, usability and the player experience.",
+    "meaning": "Functional testing checks features against intended behavior. UI/UX testing examines navigation, readability and usability. Playtesting explores the experience, including engagement, difficulty and pacing.",
+    "example": "A tutorial button works, but its label is hard to read and players do not understand what to do next. These observations call for different testing perspectives.",
+    "action": "For a tutorial screen, write one functional check, one usability check and one playtesting question."
+  },
+  {
+    "id": "t15",
+    "tag": "technique",
+    "title": "Compatibility Testing",
+    "summary": "Check relevant combinations of devices, operating systems, displays and configurations.",
+    "meaning": "Compatibility testing investigates how a game behaves across supported environments. A device matrix helps select representative configurations rather than assuming one device represents every player.",
+    "example": "A menu works on a wide display but overlaps on a smaller phone with a different aspect ratio.",
+    "action": "List two device and OS combinations and one display condition to cover for a mobile game."
+  },
+  {
+    "id": "t16",
+    "tag": "technique",
+    "title": "Spotting Mobile Game Bugs",
+    "summary": "Observe visual and functional anomalies while varying relevant conditions.",
+    "meaning": "Visual anomalies include missing textures, misaligned controls and animation glitches. Functional issues include unresponsive input, broken mechanics, crashes and performance problems. Exploratory and boundary testing can expose these issues.",
+    "example": "A control responds normally on Wi-Fi but stops responding after the connection drops.",
+    "action": "Explore a menu and a gameplay feature; record an observation, the conditions and whether you can reproduce it."
+  },
+  {
+    "id": "t17",
+    "tag": "lifecycle",
+    "title": "Mobile Bug Report Environment",
+    "summary": "Capture the context another tester needs to reproduce an issue.",
+    "meaning": "Record the device model, OS version, app version or build, and relevant network, display and setup conditions. Include preconditions, frequency, numbered steps, expected and actual results, severity and appropriate evidence.",
+    "example": "A report identifies the Android device and OS, game build, Wi-Fi condition and the steps leading to a crash.",
+    "action": "Reproduce an issue and check that another tester could set up the same environment without guessing."
   }
 ]

@@ -1,6 +1,6 @@
 # Game QA Academy — MERN Edition
 
-MERN conversion of the supplied `Game QA Academy — Learner Studio` HTML mockup. Preserves its midnight-blue / lime branding, six original course lessons, 12 theory reference entries, QA practice workflows, portfolio, and certificate eligibility rules.
+MERN conversion of the supplied `Game QA Academy — Learner Studio` HTML mockup. Preserves its midnight-blue / lime branding, original course lessons and theory entries, QA practice workflows, portfolio, and certificate eligibility rules.
 
 ## Requirements
 - Node.js 20+
@@ -58,6 +58,14 @@ SYSTEMD_SERVICE=game-qa-academy ./deploy.sh
 ```
 
 Use `./deploy.sh --no-restart` to only install and build. The optional `--seed` flag runs `npm run seed --prefix server`; use it only when you deliberately want to apply the seed data.
+
+### Adding the student sessions
+
+The seed data includes two lessons based on the student session PDFs: game-testing foundations and mobile bug identification and reporting. Related theory slides appear inside the lessons, and the full searchable glossary is available within Course. To add the new material to an existing database, back up the database and run `npm run seed --prefix server` with the intended `MONGODB_URI` configured. The seed inserts missing modules by legacy ID and theory entries by title; it does not overwrite existing records, so review any ID or title collisions in the admin editor. It also provisions an admin if the corresponding environment variables are set.
+
+Lesson-to-theory associations are defined in `client/src/components/learner/CourseTab.jsx` using the seeded module legacy IDs and theory titles. If an administrator renames a seeded theory entry, update that mapping to keep the entry in its lesson. Custom theory entries remain accessible in the glossary.
+
+The new lessons are published by default. Since certificate eligibility requires completing every published module, existing learners must complete these lessons before they can become eligible or request a certificate. Previously issued certificate records are not deleted. Admins can unpublish lessons in the content editor if they should not yet count toward eligibility.
 
 If frontend and backend are hosted on different origins, configure cookies and CSRF defense appropriately before production deployment; the supplied application assumes a same-origin reverse-proxy setup.
 

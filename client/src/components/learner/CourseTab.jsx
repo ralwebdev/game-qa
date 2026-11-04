@@ -11,10 +11,26 @@ import {
 } from 'lucide-react';
 import Badge from '../common/Badge';
 import { post } from '../../services/api';
+import { useSearchParams } from 'react-router-dom';
+import TheoryTab from './TheoryTab';
 
-export default function CourseTab({ modules, user, setUser, run, setNotice }) {
+// Seeded concepts can support more than one lesson; custom concepts remain in the glossary.
+const lessonConcepts = {
+  1: ['What is Software Testing & Why Teams Test', 'QA vs. Testing', 'Error, Defect (Bug), and Failure', 'Verification vs. Validation'],
+  2: ['Equivalence Partitioning & Boundary Value Analysis', 'Exploratory Testing & Charters', 'State-Transition & Decision Tables', 'Risk-Based Testing'],
+  3: ['Severity vs. Priority', 'Evidence & Privacy-Safe Reporting', 'Mobile Bug Report Environment'],
+  4: ['Functional Testing, UI/UX Testing and Playtesting', 'State-Transition & Decision Tables'],
+  5: ['Compatibility Testing', 'Spotting Mobile Game Bugs'],
+  6: ['Retest, Regression, Smoke, and Sanity', 'Test Execution Statuses: Pass, Fail, Blocked, Not Run'],
+  7: ['Games and Gamification', 'What is Software Testing & Why Teams Test', 'Functional Testing, UI/UX Testing and Playtesting', 'Compatibility Testing'],
+  8: ['Spotting Mobile Game Bugs', 'Exploratory Testing & Charters', 'Mobile Bug Report Environment', 'Evidence & Privacy-Safe Reporting', 'Severity vs. Priority']
+};
+
+export default function CourseTab({ modules, theory, user, setUser, run, setNotice }) {
   const completed = user?.completedModules || [];
   const [openQuizAnswers, setOpenQuizAnswers] = useState({});
+  const [searchParams, setSearchParams] = useSearchParams();
+  const showGlossary = searchParams.get('view') === 'glossary';
 
   const toggleQuizAnswer = (moduleId) => {
     setOpenQuizAnswers((prev) => ({
@@ -38,9 +54,9 @@ export default function CourseTab({ modules, user, setUser, run, setNotice }) {
     <div>
       <div className="page-header">
         <div>
-          <h1 className="page-title">Curriculum Modules</h1>
+          <h1 className="page-title">Course</h1>
           <p className="page-subtitle">
-            Industry-aligned lessons, worked game engine scenarios, practical defect drills, and self-checks.
+            Learn with theory slides, practical exercises, and self-checks.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -50,10 +66,18 @@ export default function CourseTab({ modules, user, setUser, run, setNotice }) {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gap: 18 }}>
+      <div className="filter-pills" aria-label="Course views">
+        <button type="button" className={`filter-pill ${!showGlossary ? 'active' : ''}`} aria-pressed={!showGlossary} onClick={() => setSearchParams({})}>Lessons</button>
+        <button type="button" className={`filter-pill ${showGlossary ? 'active' : ''}`} aria-pressed={showGlossary} onClick={() => setSearchParams({ view: 'glossary' })}>Theory glossary</button>
+      </div>
+
+      {showGlossary ? <TheoryTab theory={theory} /> : <div style={{ display: 'grid', gap: 18 }}>
         {modules.map((m, index) => {
           const isDone = completed.includes(m._id);
           const isAnswerRevealed = !!openQuizAnswers[m._id];
+          const relatedTheory = (lessonConcepts[m.legacyId] || [])
+            .map((title) => theory.find((item) => item.title === title))
+            .filter(Boolean);
 
           return (
             <div
@@ -80,10 +104,16 @@ export default function CourseTab({ modules, user, setUser, run, setNotice }) {
               <details className="expandable-details">
                 <summary>
                   <BookOpen size={16} />
-                  <span>Read Full Lesson, Real-world Example & Self-Check</span>
+                  <span>Open Lesson, Theory Slides &amp; Self-Check</span>
                 </summary>
 
                 <div className="mt-4" style={{ display: 'grid', gap: 16 }}>
+                  {relatedTheory.length > 0 && (
+                    <div>
+                      <h3 style={{ marginBottom: 12 }}>Theory slides</h3>
+                      <TheoryTab theory={relatedTheory} embedded />
+                    </div>
+                  )}
                   <div>
                     <h4 style={{ color: '#f8fafc', marginBottom: 6 }}>Explanation & Principles</h4>
                     <p style={{ lineHeight: 1.65 }}>{m.explanation}</p>
@@ -169,7 +199,7 @@ export default function CourseTab({ modules, user, setUser, run, setNotice }) {
             </div>
           );
         })}
-      </div>
+      </div>}
     </div>
   );
 }

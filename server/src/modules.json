@@ -70,5 +70,29 @@
       "q": "Why is regression testing essential after every bug fix?",
       "a": "Game code is highly interdependent; altering physics, memory, or UI logic in one subsystem frequently causes unintended side effects elsewhere."
     }
+  },
+  {
+    "id": 7,
+    "title": "Session 1: Foundations of Game Testing",
+    "summary": "Games and gamification, the tester?s role, and the main types of game testing.",
+    "explanation": "A game combines players, rules, objectives and feedback in voluntary play. Gamification applies game elements such as points or challenges to a non-game activity. Game testing is a structured investigation of game quality: testers compare behavior with expectations, record evidence and communicate findings throughout development, from planning to post-launch support. Functional testing checks mechanics against requirements; UI/UX testing examines navigation and usability; playtesting explores the player experience, balance and pacing; compatibility testing covers relevant devices, operating systems and displays.",
+    "example": "A mobile game has a working purchase button (functional), but its label is cut off on a small screen (UI/UX). Players find the tutorial confusing (playtesting), and the layout differs on another device (compatibility).",
+    "activity": "Choose a game and write one test idea for each of the four testing types. Identify the device or player context for each idea.",
+    "quiz": {
+      "q": "How does playtesting differ from functional testing?",
+      "a": "Functional testing checks whether features behave as intended; playtesting investigates the player experience, including enjoyment, balance and pacing."
+    }
+  },
+  {
+    "id": 8,
+    "title": "Session 2: Mobile Bug Identification & Reporting",
+    "summary": "Spot visual and functional issues and document reproducible mobile bug reports.",
+    "explanation": "Look for visual anomalies such as missing textures, overlapping controls or stuttering animations, and functional issues such as unresponsive controls, broken rules, crashes or frame drops. Explore with a purpose, vary relevant boundaries and conditions, and use regression testing to check that existing behavior still works after changes. A useful report includes a specific title, preconditions and numbered reproduction steps, expected and actual results, device and build details, severity, and evidence. Record network conditions and frequency when relevant; protect personal information in evidence.",
+    "example": "Example scenario: On a test Android device, collecting a power-up in level 3 freezes and closes the game. State the app build and device, list the steps from launch to collection, describe the expected power-up effect and the observed freeze and crash, and attach a recording if available.",
+    "activity": "Find an issue in a game you can test. Write a report with a specific title, numbered steps, expected and actual results, environment, severity and privacy-safe evidence. Attempt to reproduce it and record the frequency.",
+    "quiz": {
+      "q": "What environment information helps someone reproduce a mobile bug?",
+      "a": "Record the device model, OS version and app version or build; include relevant display, network and other conditions, as well as reproduction frequency."
+    }
   }
 ]

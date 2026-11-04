@@ -1648,3 +1648,28 @@ select.form-control {
     margin: 0;
   }
 }
+
+/* Theory slideshow */
+.theory-slide {
+  padding: clamp(22px, 4vw, 42px);
+  min-height: 360px;
+}
+.theory-slide-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #a3e635;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+.theory-slide-title { margin: 24px 0 8px; font-size: clamp(1.5rem, 3vw, 2.1rem); }
+.theory-slide-summary { color: #94a3b8; font-size: 1.05rem; margin-bottom: 24px; }
+.theory-slide-content { display: grid; gap: 18px; }
+.theory-slide-content h4 { color: #f8fafc; margin-bottom: 5px; }
+.theory-slide-content p { margin: 0; line-height: 1.65; }
+.theory-slide-navigation { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 18px; }
+@media (max-width: 480px) {
+  .theory-slide-navigation { font-size: 0.8rem; }
+  .theory-slide-navigation .btn { padding: 8px; }
+}

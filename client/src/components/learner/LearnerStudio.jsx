@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import HomeTab from './HomeTab';
 import CourseTab from './CourseTab';
-import TheoryTab from './TheoryTab';
 import PracticeTab from './PracticeTab';
 import PortfolioTab from './PortfolioTab';
 import MoreTab from './MoreTab';
@@ -69,15 +68,12 @@ export default function LearnerStudio({ tab, user, setUser, go, run, setNotice }
       {tab === 'course' && (
         <CourseTab
           modules={modules}
+          theory={theory}
           user={user}
           setUser={setUser}
           run={run}
           setNotice={setNotice}
         />
-      )}
-
-      {tab === 'theory' && (
-        <TheoryTab theory={theory} />
       )}
 
       {tab === 'practice' && (
