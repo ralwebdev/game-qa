@@ -61,7 +61,7 @@ Use `./deploy.sh --no-restart` to only install and build. The optional `--seed` 
 
 ### Adding the student sessions
 
-The curriculum contains 22 individually completable modules based on the two student session PDFs, with a theory slide for each topic and a searchable glossary within Course. The normal seed inserts missing records; it does not remove old content or overwrite existing records.
+The curriculum contains 22 individually completable modules based on the two student session PDFs, with theory content for each topic. The normal seed inserts missing records; it does not remove old content or overwrite existing records.
 
 To replace an existing database's curriculum with the PDF modules, back up the database, configure the intended `MONGODB_URI`, and run `node src/replace-curriculum.js` from the `server` directory. This deletes other modules and all existing theory entries, including administrator-created content. Existing PDF module IDs are retained on repeated runs, but progress for removed modules no longer counts. Other learner records and issued certificates are not deleted. The operation is not transactional; restore the backup if it fails partway through. Theory slides are associated with modules by their `moduleLegacyId`.
 
@@ -71,7 +71,7 @@ If frontend and backend are hosted on different origins, configure cookies and C
 
 ## Core roles and features
 
-**Learner:** email/password accounts, profile editing, learning dashboard, lesson modules and completion, searchable glossary, bug reports, test cases, editing/deleting own artifacts, portfolio JSON export, feedback, and server-issued verifiable completion certificates.
+**Learner:** email/password accounts, profile editing, learning dashboard, lesson modules and completion, bug reports, test cases, editing/deleting own artifacts, portfolio JSON export, feedback, and server-issued verifiable completion certificates.
 
 **Admin:** overview metrics, learner enable/disable, CRUD for modules and glossary, submission review with notes/status, feedback replies, and certificate register.
 
