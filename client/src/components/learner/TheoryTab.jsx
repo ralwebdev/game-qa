@@ -1,6 +1,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { Search, X, BookMarked, Lightbulb, Gamepad, Compass, ChevronLeft, ChevronRight } from 'lucide-react';
 import Badge from '../common/Badge';
+import { formatTheoryContent } from './formatTheoryContent';
 
 export default function TheoryTab({ theory, embedded = false }) {
   const [search, setSearch] = useState('');
@@ -26,6 +27,7 @@ export default function TheoryTab({ theory, embedded = false }) {
   );
   const currentSlide = Math.min(slide, Math.max(0, filteredTheory.length - 1));
   const item = filteredTheory[currentSlide];
+  const formattedContent = item && formatTheoryContent(item.meaning, item.moduleLegacyId);
 
   // Navigate slides
   const goToSlide = useCallback((n) => {
@@ -135,7 +137,15 @@ export default function TheoryTab({ theory, embedded = false }) {
             <h2 className="theory-slide-title">{item.title}</h2>
             {!embedded && <p className="theory-slide-summary">{item.summary}</p>}
             <div className="theory-slide-content">
-              {item.meaning && <div><h4>Lesson content</h4><p style={{ whiteSpace: 'pre-line' }}>{item.meaning}</p></div>}
+              {item.meaning && (formattedContent ? (
+                <div className="theory-formatted-content">
+                  {formattedContent.map((block, index) => {
+                    if (block.type === 'heading') return <h3 key={index}>{block.text}</h3>;
+                    if (block.type === 'bullet') return <ul key={index}><li>{block.text}</li></ul>;
+                    return <p key={index}>{block.text}</p>;
+                  })}
+                </div>
+              ) : <div><h4>Lesson content</h4><p style={{ whiteSpace: 'pre-line' }}>{item.meaning}</p></div>)}
               {item.importance && <div><h4>Why It Matters to QA</h4><p>{item.importance}</p></div>}
               {item.example && <div className="callout-box example">
                 <div className="flex items-center gap-2 mb-1" style={{ color: '#06b6d4', fontWeight: 700 }}><Gamepad size={16} /><span>Game Scenario Example</span></div>

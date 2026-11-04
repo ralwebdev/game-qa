@@ -2126,6 +2126,13 @@ select.form-control {
   padding: 0 14px;
 }
 .theory-concept-accordion[open] { padding-bottom: 14px; }
+.theory-formatted-content { display: grid; gap: 12px; color: var(--text-body); overflow-wrap: anywhere; }
+.theory-formatted-content h3 { color: #a3e635; font-size: 1rem; line-height: 1.4; margin: 10px 0 0; }
+.theory-formatted-content p, .theory-formatted-content li { font-size: 1rem; line-height: 1.7; }
+.theory-formatted-content p, .theory-formatted-content ul { margin: 0; }
+.theory-formatted-content ul { padding-left: 1.4rem; }
+.theory-formatted-content li::marker { color: #a3e635; }
+.theory-formatted-content ul + ul { margin-top: -6px; }
 .theory-concept-accordion summary {
   display: flex;
   align-items: center;
