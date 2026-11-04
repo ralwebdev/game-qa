@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { 
   CheckCircle2, 
   BookOpen, 
@@ -10,7 +10,11 @@ import {
   Flag,
   Search,
   X,
-  RotateCcw
+  RotateCcw,
+  ZoomIn,
+  ZoomOut,
+  Maximize2,
+  Smartphone
 } from 'lucide-react';
 import Badge from '../common/Badge';
 import { post } from '../../services/api';
@@ -34,6 +38,21 @@ export default function CourseTab({ modules, theory, user, setUser, run, setNoti
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'todo' | 'completed'
   const [searchParams, setSearchParams] = useSearchParams();
+  const [activeSlide, setActiveSlide] = useState(null);
+  const [slideZoom, setSlideZoom] = useState(1);
+  const [slideLandscape, setSlideLandscape] = useState(false);
+  const slideDialog = useRef(null);
+
+  useEffect(() => {
+    const dialog = slideDialog.current;
+    if (activeSlide && dialog && !dialog.open) dialog.showModal();
+  }, [activeSlide]);
+
+  const openSlide = (src, title) => {
+    setSlideZoom(1);
+    setSlideLandscape(false);
+    setActiveSlide({ src, title });
+  };
 
   const session = searchParams.get('session') === '2' ? 2 : 1;
 
@@ -334,10 +353,10 @@ export default function CourseTab({ modules, theory, user, setUser, run, setNoti
                       <div className="lesson-expanded-content">
                         {pdf && (
                           <div className="lesson-section">
-                            <img className="lesson-slide-image" src={slideUrl} alt={`Session ${pdf.session}, slide ${pdf.page}: ${m.title}`} loading="lazy" />
-                            <a className="course-slide-zoom" href={slideUrl} target="_blank" rel="noreferrer" aria-label={`Open full-size slide for ${m.title}`}>
-                              Open full-size slide
-                            </a>
+                            <button type="button" className="lesson-slide-open" onClick={() => openSlide(slideUrl, m.title)} aria-label={`Enlarge slide: ${m.title}`}>
+                              <img className="lesson-slide-image" src={slideUrl} alt={`Session ${pdf.session}, slide ${pdf.page}: ${m.title}`} loading="lazy" />
+                              <span><Maximize2 size={16} /> Tap to enlarge</span>
+                            </button>
                           </div>
                         )}
                         {/* 1. Related Theory Slides */}
@@ -449,6 +468,26 @@ export default function CourseTab({ modules, theory, user, setUser, run, setNoti
               })
             )}
           </div>
+      <dialog className={`slide-viewer ${slideLandscape ? 'slide-viewer-landscape' : ''}`} ref={slideDialog} aria-labelledby="slide-viewer-title" onClose={() => setActiveSlide(null)}>
+        {activeSlide && <>
+          <div className="slide-viewer-header">
+            <h2 id="slide-viewer-title">{activeSlide.title}</h2>
+            <button type="button" className="btn icon-only ghost" aria-label="Close slide" onClick={() => slideDialog.current?.close()}><X size={20} /></button>
+          </div>
+          <div className="slide-viewer-controls" aria-label="Slide zoom controls">
+            <button type="button" className="btn ghost" aria-label="Zoom out" disabled={slideZoom <= 1} onClick={() => setSlideZoom((zoom) => Math.max(1, zoom - 0.5))}><ZoomOut size={18} /></button>
+            <span aria-live="polite">{Math.round(slideZoom * 100)}%</span>
+            <button type="button" className="btn ghost" aria-label="Zoom in" disabled={slideZoom >= 3} onClick={() => setSlideZoom((zoom) => Math.min(3, zoom + 0.5))}><ZoomIn size={18} /></button>
+            <button type="button" className="btn ghost slide-orientation-toggle" aria-pressed={slideLandscape} onClick={() => setSlideLandscape((value) => !value)}>
+              <Smartphone size={18} /> {slideLandscape ? 'Portrait' : 'Landscape'}
+            </button>
+            <span className="slide-viewer-hint">Zoom in, then scroll to explore</span>
+          </div>
+          <div className="slide-viewer-content">
+            <img src={activeSlide.src} alt={`Slide: ${activeSlide.title}`} style={{ width: `${slideZoom * 100}%` }} />
+          </div>
+        </>}
+      </dialog>
     </div>
   );
 }

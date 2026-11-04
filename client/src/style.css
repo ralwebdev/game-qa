@@ -2144,6 +2144,43 @@ select.form-control {
   margin-bottom: 8px;
 }
 
+.lesson-slide-open { display: block; width: 100%; padding: 0; border: 0; background: transparent; text-align: left; color: var(--primary); cursor: zoom-in; }
+.lesson-slide-open span { display: inline-flex; align-items: center; gap: 7px; min-height: 44px; font-size: 0.85rem; font-weight: 600; }
+.lesson-slide-open:hover .lesson-slide-image { border-color: var(--primary); }
+.lesson-slide-open:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; }
+.slide-viewer { width: min(96vw, 1100px); max-width: none; max-height: 94dvh; padding: 0; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); background: #101a2b; color: #f8fafc; overflow: hidden; }
+.slide-viewer::backdrop { background: rgba(0, 0, 0, 0.85); }
+.slide-viewer[open] { display: flex; flex-direction: column; }
+.slide-viewer-header, .slide-viewer-controls { display: flex; align-items: center; gap: 12px; padding: 10px 14px; }
+.slide-viewer-header { justify-content: space-between; border-bottom: 1px solid var(--border-subtle); }
+.slide-viewer-header h2 { margin: 0; font-size: 1rem; }
+.slide-viewer-controls .btn { min-width: 44px; min-height: 44px; }
+.slide-viewer-controls > span[aria-live] { min-width: 3.5em; text-align: center; }
+.slide-viewer-hint { color: #94a3b8; font-size: 0.8rem; }
+.slide-viewer-content { overflow: auto; overscroll-behavior: contain; background: #202938; max-height: calc(94dvh - 130px); touch-action: pan-x pan-y pinch-zoom; }
+.slide-viewer-content img { display: block; max-width: none; height: auto; }
+.slide-orientation-toggle { display: none !important; }
+@media (max-width: 480px) { .slide-viewer { width: 100vw; max-height: 100dvh; border-radius: 0; } .slide-viewer-hint { font-size: 0.7rem; } .slide-viewer-content { max-height: calc(100dvh - 130px); } }
+@media (max-width: 480px) and (orientation: portrait) {
+  .slide-orientation-toggle { display: inline-flex !important; min-height: 44px; }
+  .slide-viewer-controls { flex-wrap: wrap; }
+  .slide-viewer-landscape[open] {
+    position: fixed;
+    inset: auto;
+    top: 0;
+    left: 100vw;
+    width: 100dvh;
+    height: 100vw;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    border-radius: 0;
+    transform: rotate(90deg);
+    transform-origin: top left;
+  }
+  .slide-viewer-landscape .slide-viewer-content { flex: 1 1 auto; min-height: 0; max-height: none; }
+}
+
 .lesson-section {
   margin-bottom: 18px;
 }
