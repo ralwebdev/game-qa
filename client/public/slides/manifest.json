@@ -1,0 +1,114 @@
+[
+  {
+    "id": "session-1",
+    "title": "Foundations of Game Testing",
+    "slides": [
+      {
+        "slideNumber": 1,
+        "image": "/slides/session-1/slide-01.webp"
+      },
+      {
+        "slideNumber": 2,
+        "image": "/slides/session-1/slide-02.webp"
+      },
+      {
+        "slideNumber": 3,
+        "image": "/slides/session-1/slide-03.webp"
+      },
+      {
+        "slideNumber": 4,
+        "image": "/slides/session-1/slide-04.webp"
+      },
+      {
+        "slideNumber": 5,
+        "image": "/slides/session-1/slide-05.webp"
+      },
+      {
+        "slideNumber": 6,
+        "image": "/slides/session-1/slide-06.webp"
+      },
+      {
+        "slideNumber": 7,
+        "image": "/slides/session-1/slide-07.webp"
+      },
+      {
+        "slideNumber": 8,
+        "image": "/slides/session-1/slide-08.webp"
+      },
+      {
+        "slideNumber": 9,
+        "image": "/slides/session-1/slide-09.webp"
+      },
+      {
+        "slideNumber": 10,
+        "image": "/slides/session-1/slide-10.webp"
+      },
+      {
+        "slideNumber": 11,
+        "image": "/slides/session-1/slide-11.webp"
+      },
+      {
+        "slideNumber": 12,
+        "image": "/slides/session-1/slide-12.webp"
+      },
+      {
+        "slideNumber": 13,
+        "image": "/slides/session-1/slide-13.webp"
+      },
+      {
+        "slideNumber": 14,
+        "image": "/slides/session-1/slide-14.webp"
+      },
+      {
+        "slideNumber": 15,
+        "image": "/slides/session-1/slide-15.webp"
+      }
+    ]
+  },
+  {
+    "id": "session-2",
+    "title": "Bug Identification & Reporting Essentials",
+    "slides": [
+      {
+        "slideNumber": 1,
+        "image": "/slides/session-2/slide-01.webp"
+      },
+      {
+        "slideNumber": 2,
+        "image": "/slides/session-2/slide-02.webp"
+      },
+      {
+        "slideNumber": 3,
+        "image": "/slides/session-2/slide-03.webp"
+      },
+      {
+        "slideNumber": 4,
+        "image": "/slides/session-2/slide-04.webp"
+      },
+      {
+        "slideNumber": 5,
+        "image": "/slides/session-2/slide-05.webp"
+      },
+      {
+        "slideNumber": 6,
+        "image": "/slides/session-2/slide-06.webp"
+      },
+      {
+        "slideNumber": 7,
+        "image": "/slides/session-2/slide-07.webp"
+      },
+      {
+        "slideNumber": 8,
+        "image": "/slides/session-2/slide-08.webp"
+      },
+      {
+        "slideNumber": 9,
+        "image": "/slides/session-2/slide-09.webp"
+      },
+      {
+        "slideNumber": 10,
+        "image": "/slides/session-2/slide-10.webp"
+      }
+    ]
+  }
+]

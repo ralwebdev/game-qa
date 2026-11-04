@@ -4,7 +4,6 @@ import {
   Gamepad2, 
   Home, 
   BookOpen, 
-  Search, 
   FlaskConical, 
   Folder, 
   LogOut, 
@@ -15,7 +14,6 @@ import {
 export const NAV_ITEMS = [
   { key: 'home', label: 'Home', icon: Home },
   { key: 'course', label: 'Course', icon: BookOpen },
-  { key: 'theory', label: 'Theory', icon: Search },
   { key: 'practice', label: 'Practice', icon: FlaskConical },
   { key: 'portfolio', label: 'Portfolio', icon: Folder },
   { key: 'settings', label: 'Settings', icon: Settings }

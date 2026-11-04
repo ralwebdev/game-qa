@@ -1,120 +1,178 @@
 [
   {
-    "id": "t1",
+    "id": "pdf101",
+    "moduleLegacyId": 101,
     "tag": "concept",
-    "title": "What is Software Testing & Why Teams Test",
-    "summary": "The disciplined process of evaluating software to uncover discrepancies and mitigate release risk.",
-    "meaning": "Testing is empirical investigation conducted to provide stakeholders with objective information about product quality and behavioral risks.",
-    "importance": "Without rigorous testing, fatal crashes, security vulnerabilities, or broken game economies reach real players, damaging studio reputation.",
-    "example": "In a multiplayer shooter, QA validates that collision geometry stops players from walking through mountain walls to gain an unfair advantage.",
-    "action": "Observe games you play: notice subtle edge conditions like pausing right as a dialogue trigger starts."
+    "title": "What Is a Game?",
+    "summary": "Session 1 ? What Is a Game?",
+    "meaning": "What is a game?\nA game is a structured play, typically for entertainment or education, with rules, goals,\nand interaction.\nComponents: players, rules, objectives, feedback system, voluntary participation.\nWhy it matters: Games are rapidly grown as a medium\nbeyond entertainment (education, training, simulation)."
   },
   {
-    "id": "t2",
+    "id": "pdf102",
+    "moduleLegacyId": 102,
     "tag": "concept",
-    "title": "QA vs. Testing",
-    "summary": "Process-oriented quality assurance vs. execution-oriented defect identification.",
-    "meaning": "QA focuses on standards, processes, and continuous improvement to prevent defects from being injected into the pipeline. Testing is the tactical execution of the product to find existing defects.",
-    "importance": "Having testing without QA means you continually fight fires; having QA without testing means you never empirically inspect the software.",
-    "example": "QA establishes coding guidelines and automated build validation. Testing executes a 2-hour stress test on Android builds.",
-    "action": "Evaluate your own workflow: do you check requirements before starting, or solely inspect after writing code?"
+    "title": "What Is Gamification?",
+    "summary": "Session 1 ? What Is Gamification?",
+    "meaning": "What is Gamification?\nWhat is Gamification?\nThe application of game-design elements\n(points, badges, leaderboards, challenges) in non-game contexts.\nWhy use it: Boosts engagement, motivation, behaviour change.\nIllustrative industries:\nCorporate training (e.g., sales reps rewarded for modules completed)\nE-learning / education (students gaining badges for tasks)\nHealth & wellness apps (fitness challenges)\nMarketing/retail (loyalty programmes with “levels”)\nInsurance Sector (to create simulations and risk assessments)\nFinance (Example: trading apps/ crypto exchanges etc.)"
   },
   {
-    "id": "t3",
+    "id": "pdf103",
+    "moduleLegacyId": 103,
     "tag": "concept",
-    "title": "Error, Defect (Bug), and Failure",
-    "summary": "The fundamental chain of human mistake, code flaw, and observable runtime breakdown.",
-    "meaning": "An Error is a human mistake made by a programmer or designer. A Defect (bug) is the flaw remaining in the software artifact. A Failure is the unintended event experienced when the flawed code executes.",
-    "importance": "Distinguishing these prevents blaming players for unexpected behaviors and helps developers locate root causes quickly.",
-    "example": "Error: Dev writes `if (hp = 0)` instead of `==`. Defect: Assignment replaces comparison. Failure: Player immediately dies upon taking 1 point of damage.",
-    "action": "When encountering an anomaly, trace backwards from the symptom (failure) to where logic might have slipped."
+    "title": "What Is Game Testing?",
+    "summary": "Session 1 ? What Is Game Testing?",
+    "meaning": "What is Game Testing?\nGame testing is a structured quality assurance process that evaluates\nvideo games to identify bugs, ensure functionality, and verify the\nplayer experience meets quality standards before release.\nIt's more than just playing games—it's a methodical approach to\nfinding issues, documenting them clearly, and helping developers\ncreate polished, engaging experiences that players love."
   },
   {
-    "id": "t4",
+    "id": "pdf104",
+    "moduleLegacyId": 104,
     "tag": "concept",
-    "title": "Verification vs. Validation",
-    "summary": "Building the product right (verification) vs. building the right product (validation).",
-    "meaning": "Verification asks: 'Did we build the game according to specifications?'. Validation asks: 'Does the game satisfy the real player's expectations and needs?'.",
-    "importance": "A game can pass 100% of specification checks (Verification) while still feeling confusing or unpleasant to play (Validation).",
-    "example": "Verification: Jumping velocity exactly matches the 12.5 m/s spec. Validation: Playtesters report that jumping feels sluggish and floats unrealistically.",
-    "action": "When testing a feature, first check the design doc, then step back and ask: 'Does this actually feel satisfying?'."
+    "title": "The Game Testing Landscape",
+    "summary": "Session 1 ? The Game Testing Landscape",
+    "meaning": "The figures below are historical estimates from the supplied presentation and may have changed.\n\nThe Game Testing Landscape – Global & India\nGlobal market data: For instance, the global game testing services\nmarket was valued at approx USD 2.5 billion in 2023 and projected\nto reach ~USD 5.8 billion by 2032. DataIntelo\nMarket size (2025): ~USD 4.38 billion (India gaming market estimate\nfor 2025). Mordor Intelligence.\nAccording to a report published in Economic Times- for Indian\ngaming industry there are ~50,000-60,000 job openings across\nfresher & experienced roles. The Economic Times"
   },
   {
-    "id": "t5",
-    "tag": "technique",
-    "title": "Equivalence Partitioning & Boundary Value Analysis",
-    "summary": "Dividing input domains into valid/invalid subsets and testing their exact edges.",
-    "meaning": "Equivalence groups assume values in the same partition produce identical logic. Boundary testing validates the minimum and maximum edges where comparisons flip.",
-    "importance": "You cannot test billions of input combinations. Boundary analysis provides maximum defect-finding power in minimal time.",
-    "example": "Level limits 1-50. Equivalence sets: Invalid negative, Valid (1-50), Invalid (>50). Boundaries tested: 0, 1, 50, 51.",
-    "action": "List the boundaries for a high-score leaderboard displaying ranks 1 through 100."
+    "id": "pdf105",
+    "moduleLegacyId": 105,
+    "tag": "concept",
+    "title": "Game Tester Salary Ranges in India",
+    "summary": "Session 1 ? Game Tester Salary Ranges in India",
+    "meaning": "The figures below are historical estimates from the supplied presentation and may have changed.\n\nGame Tester Salary Range in India\nLevel Role Typical Salary Range*\nEntry-level Game Tester / QA Tester ~ ₹2 – 4 lakh for freshers (0-2 years\nexperience) (Glassdoor)\nMid-level Senior Tester / QA Lead ~ ₹12 – 20 lakh+ for 4-8 years’ experience\nin lead roles (6figr)\nAdvanced Automation Engineer (Test) / QA Manager\n/ Game QA Director\n~ ₹18 – 30 lakh+ (and for senior\ndirector/executive roles could go higher)\n(Glassdoor)\n*Ranges are indicative, not guaranteed."
   },
   {
-    "id": "t6",
-    "tag": "technique",
-    "title": "Exploratory Testing & Charters",
-    "summary": "Simultaneous learning, test design, and test execution guided by a clear mission charter.",
-    "meaning": "Unlike rigid scripted checklists, exploratory testing gives skilled testers freedom to investigate anomalies using structured time-boxed charters.",
-    "importance": "Scripted tests only find what was anticipated. Exploratory testing uncovers unexpected emergent behaviors in complex games.",
-    "example": "Charter: 'Explore character inventory switching during rapid network latency to discover item duplication defects within 45 minutes.'",
-    "action": "Pick a mobile game menu and explore it for 15 minutes with the express mission of interrupting animations."
+    "id": "pdf106",
+    "moduleLegacyId": 106,
+    "tag": "concept",
+    "title": "Becoming a Professional Game Tester",
+    "summary": "Session 1 ? Becoming a Professional Game Tester",
+    "meaning": "How One Can Become a Professional Game Tester?\nPrerequisites / Skills:\nStrong attention to detail & curiosity (find bugs, break\nthings)\nBasic technical awareness: familiarity with platforms\n(mobile, PC, console), ability to reproduce issues,\nunderstanding resolution/performance/compatibility\nconcepts.\nCommunication skills: to write bug reports clearly, work\nin teams.\nDomain knowledge: gaming mechanics, user behaviour,\nUX.\n(Preferred) Some programming / scripting / test\nautomation basics for advanced roles.\nQualifications & Certifications:\nFormal education: e.g., degree in computer science/IT or\ngame design/QA is helpful but not always mandatory.\nCertifications/training: Courses on game testing,\nsoftware QA, gamification, etc.\nPortfolio: Having played, tested games, contributed bug\nlogs (internships, volunteer)."
   },
   {
-    "id": "t7",
-    "tag": "technique",
-    "title": "State-Transition & Decision Tables",
-    "summary": "Mapping out game entity states (Alive, Stunned, Dead) and input condition combinations.",
-    "meaning": "A state machine ensures entities only move between legal states. Decision tables map complex multi-variable business rules into a grid.",
-    "example": "Can a player cast a spell while 'Stunned'? State table shows Stunned -> Cast is an illegal transition.",
-    "action": "Draw a simple state transition diagram for an in-game shopping cart: Empty -> Populated -> Checkout -> Completed."
+    "id": "pdf107",
+    "moduleLegacyId": 107,
+    "tag": "concept",
+    "title": "Why QA Matters in Gaming",
+    "summary": "Session 1 ? Why QA Matters in Gaming",
+    "meaning": "Why QA Matters in Gaming\nPlayer Experience\nQuality testing ensures smooth, enjoyable gameplay\nthat keeps players engaged and satisfied from start to\nfinish.\nBrand Reputation\nPolished releases build trust and loyalty. Buggy\nlaunches damage studio credibility and player\nconfidence.\nCost Savings\nFinding bugs early is exponentially cheaper than post-\nlaunch fixes, patches, and customer support.\nSmoother Development\nQA feedback helps teams iterate faster, make informed\ndecisions, and deliver on schedule with confidence."
   },
   {
-    "id": "t8",
-    "tag": "technique",
-    "title": "Risk-Based Testing",
-    "summary": "Prioritizing testing effort based on defect likelihood and severity of impact.",
-    "meaning": "When release deadlines approach, QA focuses on high-risk features (payment transactions, core progression saves) over low-risk cosmetics.",
-    "example": "Focusing 80% of test cycles on in-app purchase receipts rather than the credit roll typography.",
-    "action": "Rank 3 features by risk: In-app store, Options volume slider, and Single-player save loading."
+    "id": "pdf108",
+    "moduleLegacyId": 108,
+    "tag": "concept",
+    "title": "QA in the Game Development Pipeline",
+    "summary": "Session 1 ? QA in the Game Development Pipeline",
+    "meaning": "QA in the Game Development\nPipeline\nQuality assurance isn't just a final checkpoint—it's integrated throughout the entire\ndevelopment cycle. QA testers work alongside designers, artists, and programmers from\npre-production through post-launch support.\nPre-Production\nPlanning test strategies and understanding game vision\nProduction\nContinuous testing as features are built and integrated\nLaunch & Beyond\nFinal verification and post-release monitoring\nEarly detection is invaluable: Catching issues during development prevents them from\nbecoming expensive, time-consuming problems later. A bug found in alpha testing might\ntake hours to fix; the same bug discovered after launch could cost thousands in patches\nand lost players."
   },
   {
-    "id": "t9",
-    "tag": "lifecycle",
-    "title": "Severity vs. Priority",
-    "summary": "Technical impact on the system vs. urgency of business scheduling.",
-    "meaning": "Severity is determined primarily by QA based on how badly the product is impaired. Priority is set by product leadership based on release readiness and user impact.",
-    "importance": "Conflating severity and priority causes developers to patch minor edge-case crashes instead of release-blocking visual typos.",
-    "example": "A spelling typo on the startup title screen: Low Severity, High Priority (damages immediate first impression).",
-    "action": "Practice classifying real bugs into 2x2 grids: High/Low Severity vs. High/Low Priority."
+    "id": "pdf109",
+    "moduleLegacyId": 109,
+    "tag": "concept",
+    "title": "Types of Game Testing",
+    "summary": "Session 1 ? Types of Game Testing",
+    "meaning": "Types of Game Testing\nGame testing encompasses multiple specialized areas, each focusing on different aspects of quality and player experience.\nHere are the core testing types every game tester should understand:\n1\nFunctional Testing\nVerifies that game features, mechanics, and systems\nwork as intended without errors or crashes.\n2\nUI/UX Testing\nEvaluates interface design, navigation flow, readability,\nand overall user experience quality.\n3\nPlaytesting\nAssesses fun factor, game balance, pacing, difficulty\ncurves, and player engagement levels.\n4\nCompatibility Testing\nEnsures the game performs consistently across\ndifferent devices, platforms, and configurations."
   },
   {
-    "id": "t10",
-    "tag": "lifecycle",
-    "title": "Evidence & Privacy-Safe Reporting",
-    "summary": "Attaching logs, screenshots, and videos without leaking sensitive user identifiers.",
-    "meaning": "High-quality bug reports require concrete evidence (logs, timestamps). Testers must ensure no private account tokens, emails, or PII are exposed in screenshots.",
-    "importance": "Protects privacy compliance while providing developers visual proof of reproduction steps.",
-    "example": "Blurring out test player email addresses or payment card tokens in QA video attachments.",
-    "action": "Inspect bug reports to confirm screenshots only display test accounts in sandbox environments."
+    "id": "pdf110",
+    "moduleLegacyId": 110,
+    "tag": "concept",
+    "title": "Functional Testing",
+    "summary": "Session 1 ? Functional Testing",
+    "meaning": "Functional Testing Deep Dive\nWhat is Functional Testing?\nFunctional testing verifies that every game feature, mechanic, and\nsystem operates correctly according to design specifications.\nTesters systematically check that buttons work, physics behave\nproperly, progression systems function, and game rules are\nenforced accurately.\nCommon Functional Bugs:\n• Collision Detection Failure: Players can walk through walls or\nfall through the floor due to broken collision boundaries.\n• Save/Load Corruption: Game progress fails to save correctly,\nor loading a save file crashes the game or resets player data."
   },
   {
-    "id": "t11",
-    "tag": "lifecycle",
-    "title": "Retest, Regression, Smoke, and Sanity",
-    "summary": "Understanding the four key execution cycles in agile and release testing.",
-    "meaning": "Smoke test: quick broad check that build runs. Sanity test: focused check that specific subsystem works. Retest: confirming a bug is resolved. Regression: confirming nothing else broke.",
-    "importance": "Executing full test suites for every tiny hotfix is impossible; distinct test passes optimize QA bandwidth.",
-    "example": "Smoke test: Launch game, reach main menu, start tutorial. Takes 5 minutes.",
-    "action": "Design a 3-step smoke test for your favorite phone application."
+    "id": "pdf111",
+    "moduleLegacyId": 111,
+    "tag": "concept",
+    "title": "UI and UX Testing",
+    "summary": "Session 1 ? UI and UX Testing",
+    "meaning": "UI/UX Testing Essentials\nWhat is UI/UX Testing?\nUI/UX testing evaluates the visual interface and user experience to ensure players can navigate menus intuitively, read text clearly,\nand interact with the game comfortably. It focuses on usability, accessibility, and visual polish.\nExample: Text Cutoff\nMenu text or subtitles are partially hidden or truncated on\ncertain screen resolutions or aspect ratios, making content\nunreadable.\nExample: Button Overlap\nUI buttons overlap each other in specific languages or\ndevice sizes, making them impossible to click or causing\nwrong inputs."
   },
   {
-    "id": "t12",
-    "tag": "lifecycle",
-    "title": "Test Execution Statuses: Pass, Fail, Blocked, Not Run",
-    "summary": "Standard reporting statuses used in studio test management tools.",
-    "meaning": "Pass: behavior matches specification. Fail: defect identified. Blocked: an external bug prevents executing the step. Not Run: test pending execution.",
-    "importance": "Clear statuses provide team leads with real-time visibility into actual test velocity and bottlenecks.",
-    "example": "If a door cannot be opened due to a missing key, any test case evaluating the dungeon behind it is marked 'Blocked'.",
-    "action": "Never mark a test 'Pass' if you skipped any precondition or prerequisite step."
+    "id": "pdf112",
+    "moduleLegacyId": 112,
+    "tag": "concept",
+    "title": "Playtesting for Engagement",
+    "summary": "Session 1 ? Playtesting for Engagement",
+    "meaning": "Playtesting for Engagement\nFun Factor\nIs the game genuinely enjoyable? Does\nit create memorable moments and\nkeep players wanting more?\nBalance & Pacing\nAre difficulty spikes fair? Does the\ngame maintain good rhythm without\nfeeling too slow or overwhelming?\nDifficulty Curve\nDoes challenge increase smoothly? Are\ntutorials effective and does\nprogression feel rewarding throughout?\nPlaytesting focuses on the subjective player experience—what feels right, what's frustrating, and what makes the game\nworth playing. This feedback shapes design iterations and helps developers refine gameplay to be as compelling as\npossible."
+  },
+  {
+    "id": "pdf113",
+    "moduleLegacyId": 113,
+    "tag": "concept",
+    "title": "Compatibility Testing",
+    "summary": "Session 1 ? Compatibility Testing",
+    "meaning": "Compatibility Testing Coverage\nModern games must run smoothly across an incredible variety of hardware and software configurations.\nCompatibility testing ensures consistent performance and quality no matter how players access your game.\nDevice Variations\nTesting across different hardware specs: high-end gaming PCs, mid-range laptops, mobile devices, and older\nsystems.\nOS Versions\nVerifying compatibility with Windows 10/11, macOS versions, iOS, Android, PlayStation OS, Xbox OS, and Switch\nfirmware.\nResolutions & Displays\nEnsuring proper rendering at 1080p, 1440p, 4K, ultrawide formats, and various aspect ratios without distortion.\nPerformance Issues\nMonitoring frame rates, load times, memory usage, and identifying optimization opportunities for smooth\ngameplay."
+  },
+  {
+    "id": "pdf114",
+    "moduleLegacyId": 114,
+    "tag": "concept",
+    "title": "The Role of a Game Tester",
+    "summary": "Session 1 ? The Role of a Game Tester",
+    "meaning": "The Role of a Game Tester\nKey Responsibilities\n• Execute test plans and document bugs clearly with\nreproduction steps\n• Verify fixes and conduct regression testing\n• Communicate findings effectively to development\nteams\n• Maintain attention to detail while testing repetitively\n• Provide constructive feedback on gameplay and user\nexperience\nSession Takeaways\n• QA is essential throughout the entire development\npipeline\n• Different testing types serve specific quality goals\n• Early bug detection saves time, money, and reputation\n• Testers bridge the gap between developers and players\n• Quality testing requires both technical skill and player\nempathy\nReady to start your game testing journey? Apply these foundations, stay curious, and remember: every bug you\ncatch makes games better for millions of players."
+  },
+  {
+    "id": "pdf115",
+    "moduleLegacyId": 115,
+    "tag": "concept",
+    "title": "Spotting Bugs in Mobile Games",
+    "summary": "Session 2 ? Spotting Bugs in Mobile Games",
+    "meaning": "How to Spot Bugs in Mobile\nGames\nVisual Anomalies\n• Graphics glitches or missing\ntextures\n• UI elements overlapping or\nmisaligned\n• Animation stuttering or\nfreezing\n• Incorrect colours or visual\neffects\nFunctional Issues\n• Controls not responding as\nexpected\n• Game logic errors or broken\nmechanics\n• Crashes or unexpected app\nclosures\n• Performance problems like\nlag or frame drops"
+  },
+  {
+    "id": "pdf116",
+    "moduleLegacyId": 116,
+    "tag": "concept",
+    "title": "Key Testing Strategies",
+    "summary": "Session 2 ? Key Testing Strategies",
+    "meaning": "Key Testing Strategies\nExploratory Testing\nPlay the game naturally whilst staying\nalert to unexpected behaviour or visual\ninconsistencies\nEdge Case Testing\nTest boundary conditions like\nminimum/maximum values, poor\nconnectivity, or device limitations\nRegression Testing\nVerify that previously working features\nstill function correctly after updates or\nchanges"
+  },
+  {
+    "id": "pdf117",
+    "moduleLegacyId": 117,
+    "tag": "concept",
+    "title": "Anatomy of a Bug Report",
+    "summary": "Session 2 ? Anatomy of a Bug Report",
+    "meaning": "Anatomy of an Excellent Bug Report\nEvery effective bug report contains six essential components that enable developers to quickly understand and resolve issues\nClear Title\nConcise summary of the issue\nReproduction Steps\nDetailed sequence to recreate\nExpected vs Actual\nWhat should happen vs what does\nEnvironment Details\nDevice, OS, and app version\nVisual Evidence\nScreenshots or video recordings\nSeverity Level\nImpact on user experience"
+  },
+  {
+    "id": "pdf118",
+    "moduleLegacyId": 118,
+    "tag": "concept",
+    "title": "Writing an Effective Bug Title",
+    "summary": "Session 2 ? Writing an Effective Bug Title",
+    "meaning": "Writing an Effective Bug Title\nPoor Example\n\"Game doesn't work\"\nToo vague – provides no actionable information about\nthe specific issue or where it occurs\n✓ Good Example\n\"Level 3 crashes when collecting power-up on\nSamsung Galaxy S21\"\nSpecific, clear, and includes key context about location\nand device\nPro tip: Your title should enable someone to understand the core issue in under five seconds"
+  },
+  {
+    "id": "pdf119",
+    "moduleLegacyId": 119,
+    "tag": "concept",
+    "title": "Steps to Reproduce",
+    "summary": "Session 2 ? Steps to Reproduce",
+    "meaning": "Steps to Reproduce\nClear reproduction steps are the most critical part of any bug report. Write them as if explaining to someone who has never used the app before.\nStep 1\nLaunch PlayzHub app v2.1.0 on Android device\nStep 2\nNavigate to \"Puzzle Games\" category and select \"Block Breaker\"\nStep 3\nComplete Level 2 and proceed to Level 3\nStep 4\nCollect the yellow power-up in top-right corner\nResult\nApplication crashes immediately to home screen"
+  },
+  {
+    "id": "pdf120",
+    "moduleLegacyId": 120,
+    "tag": "concept",
+    "title": "Expected and Actual Results",
+    "summary": "Session 2 ? Expected and Actual Results",
+    "meaning": "Expected vs Actual Results\nExpected Result\nCollecting the yellow power-up should activate a shield\neffect around the player's character for 10 seconds,\naccompanied by a sound effect and visual animation.\nThe game should continue normally with the shield active.\nActual Result\nUpon touching the yellow power-up, the app freezes for\napproximately 2 seconds, displays a black screen, then\ncrashes completely to the device home screen.\nNo error message is shown.\nThis comparison clearly shows the gap between intended behaviour and what actually occurs, helping developers pinpoint\nthe root cause."
+  },
+  {
+    "id": "pdf121",
+    "moduleLegacyId": 121,
+    "tag": "concept",
+    "title": "Device and Environment Details",
+    "summary": "Session 2 ? Device and Environment Details",
+    "meaning": "Device & Environment Details\nDevice Information\n• Model: Samsung Galaxy S21\n• Screen Resolution: 1080 x 2400\n• RAM: 8GB\nOperating System\n• OS: Android 13\n• Build Number: TP1A.220624.014\n• Security Patch: 1 March 2024\nApp Details\n• App Version: 2.1.0 (Build 47)\n• Install Method: Google Play Store\n• Last Updated: 15 April 2024\nNetwork Conditions\n• Connection: WiFi (50 Mbps)\n• Carrier: N/A\n• Location Services: Enabled"
+  },
+  {
+    "id": "pdf122",
+    "moduleLegacyId": 122,
+    "tag": "concept",
+    "title": "Practice and Portfolio",
+    "summary": "Session 2 ? Practice and Portfolio",
+    "meaning": "Your Next Steps\nPractice on PlayzHub\nVisit playzhub.com and apply\nthese techniques during your\nnext testing session\nCreate Your Template\nDevelop a standardised bug\nreport template incorporating\nall six essential elements\nBuild Your Portfolio\nDocument 5-10 well-written bug reports to demonstrate your skills to\npotential employers\nRemember: Clear bug reports save development time and\nimprove product quality. Your attention to detail makes a real\ndifference."
   }
 ]
