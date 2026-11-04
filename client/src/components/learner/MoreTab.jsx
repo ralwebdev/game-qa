@@ -156,12 +156,20 @@ export default function MoreTab({ user, setUser, dash, bugs, cases, feedback, go
         </div>
 
         {dash?.certificate ? (
-          <CertificateView
-            user={user}
-            cert={dash.certificate}
-            bugs={bugs.length}
-            cases={cases.length}
-          />
+          <>
+            {dash.certificate.remarks && (
+              <div className="certificate-remarks">
+                <strong>Remarks from your instructor</strong>
+                <p>{dash.certificate.remarks}</p>
+              </div>
+            )}
+            <CertificateView
+              user={user}
+              cert={dash.certificate}
+              bugs={bugs.length}
+              cases={cases.length}
+            />
+          </>
         ) : (
           <div>
             <p className="text-muted">

@@ -8,7 +8,6 @@ import {
   MessageSquare, 
   Award, 
   ShieldCheck, 
-  Upload, 
   CheckCircle, 
   XCircle, 
   Send 
@@ -16,7 +15,7 @@ import {
 import StatCard from '../common/StatCard';
 import Badge from '../common/Badge';
 import FormField from '../common/FormField';
-import { api, post, patch, uploadCertificate } from '../../services/api';
+import { api, post, patch } from '../../services/api';
 
 export default function AdminDashboard({ run, setNotice }) {
   const [tab, setTab] = useState('overview');
@@ -30,6 +29,7 @@ export default function AdminDashboard({ run, setNotice }) {
   const [certificates, setCertificates] = useState([]);
   const [reviewForms, setReviewForms] = useState({});
   const [replies, setReplies] = useState({});
+  const [certificateRemarks, setCertificateRemarks] = useState({});
 
   useEffect(() => {
     Promise.all([
@@ -143,7 +143,7 @@ export default function AdminDashboard({ run, setNotice }) {
             <div>
               <h2 style={{ margin: 0 }}>Learner Accounts ({users.length})</h2>
               <p className="text-muted text-sm mt-1">
-                Upload verified PDF/PNG/JPEG completion files (max 10MB) or toggle account access.
+                Issue certificates with optional learner-visible remarks or manage account access. Admin issuance does not require course completion.
               </p>
             </div>
           </div>
@@ -155,7 +155,7 @@ export default function AdminDashboard({ run, setNotice }) {
                   <th>Learner</th>
                   <th>Role</th>
                   <th>Modules Done</th>
-                  <th>Official File</th>
+                  <th>Certificate &amp; Remarks</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -175,24 +175,23 @@ export default function AdminDashboard({ run, setNotice }) {
                       </span>
                     </td>
                     <td>
-                      <label className="upload-btn-label">
-                        <Upload size={14} />
-                        <span>{u.certificate?.fileName ? u.certificate.fileName.slice(0, 18) + '…' : 'Attach PDF/PNG'}</span>
-                        <input
-                          type="file"
-                          accept="application/pdf,image/png,image/jpeg"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              run(async () => {
-                                await uploadCertificate(u._id, file);
-                                setNotice(`Certificate file uploaded for ${u.name}`);
-                              });
-                              e.target.value = '';
-                            }
-                          }}
+                      <div className="admin-certificate-action">
+                        <textarea
+                          className="form-control"
+                          rows={2}
+                          maxLength={1000}
+                          aria-label={`Certificate remarks for ${u.name}`}
+                          placeholder="Remarks (optional)"
+                          value={certificateRemarks[u._id] ?? u.certificate?.remarks ?? ''}
+                          onChange={(event) => setCertificateRemarks((prev) => ({ ...prev, [u._id]: event.target.value }))}
                         />
-                      </label>
+                        <button type="button" className="btn sm primary" onClick={() => run(async () => {
+                          await post(`/admin/users/${u._id}/certificate`, { remarks: certificateRemarks[u._id] ?? u.certificate?.remarks ?? '' });
+                          setNotice(u.certificate ? `Certificate remarks updated for ${u.name}.` : `Certificate issued to ${u.name}.`);
+                        })}>
+                          <Award size={14} /> {u.certificate ? 'Save Remarks' : 'Issue Certificate'}
+                        </button>
+                      </div>
                     </td>
                     <td>
                       <button

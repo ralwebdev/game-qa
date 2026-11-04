@@ -73,7 +73,7 @@ If frontend and backend are hosted on different origins, configure cookies and C
 
 **Learner:** email/password accounts, profile editing, learning dashboard, lesson modules and completion, bug reports, test cases, editing/deleting own artifacts, portfolio JSON export, feedback, and server-issued verifiable completion certificates.
 
-**Admin:** overview metrics, learner enable/disable, read-only course content, submission review with notes/status, feedback replies, and certificate register.
+**Admin:** overview metrics, learner enable/disable, read-only course content, submission review with notes/status, feedback replies, and certificate issuance with optional learner-visible remarks. Administrators can issue certificates regardless of learner progress; issuing again updates the remarks on the existing certificate.
 
 **Eligibility:** complete every course module, submit >=1 bug report, and submit >=1 test case. Certificate codes are generated and stored on the server. Certificates reflect course completion only, not an external accreditation.
 
@@ -88,6 +88,7 @@ If frontend and backend are hosted on different origins, configure cookies and C
 - `GET/POST /api/feedback`
 - `POST /api/certificates/issue`, `GET /api/certificates/verify/:code`
 - `GET /api/admin/stats`, `GET /api/admin/users`, `PATCH /api/admin/users/:id`
+- `POST /api/admin/users/:id/certificate` issues a certificate or updates its remarks.
 - `GET /api/admin/bugs`, `GET /api/admin/cases`, `PATCH /api/admin/:type/:id/review`
 - `GET /api/admin/feedback`, `PATCH /api/admin/feedback/:id`, `GET /api/admin/certificates`
 

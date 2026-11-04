@@ -2124,6 +2124,12 @@ select.form-control {
 }
 
 
+.admin-certificate-action { display: grid; gap: 8px; min-width: 220px; }
+.admin-certificate-action textarea { min-height: 60px; resize: vertical; }
+.admin-certificate-action .btn { justify-self: start; }
+.certificate-remarks { margin: 0 0 18px; padding: 14px 16px; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); }
+.certificate-remarks p { margin: 6px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+
 .theory-concept-accordion {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
