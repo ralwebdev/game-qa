@@ -128,7 +128,7 @@ export default function App() {
       ) : user.role === 'admin' ? (
         location.pathname === '/admin' ? <AdminDashboard key={refresh} run={run} setNotice={setNotice} /> : <Navigate to="/admin" replace />
       ) : location.pathname === '/theory' ? (
-        <Navigate to="/course?view=glossary" replace />
+        <Navigate to="/course" replace />
       ) : ['/more', '/profile'].includes(location.pathname) ? (
         <Navigate to="/settings" replace />
       ) : !tab ? (
