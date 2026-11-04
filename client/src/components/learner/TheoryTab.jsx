@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { Search, X, BookMarked, Lightbulb, Gamepad, Compass, ChevronLeft, ChevronRight } from 'lucide-react';
 import Badge from '../common/Badge';
 
@@ -6,6 +6,12 @@ export default function TheoryTab({ theory, embedded = false }) {
   const [search, setSearch] = useState('');
   const [tag, setTag] = useState('all');
   const [slide, setSlide] = useState(0);
+
+  // Touch swipe state
+  const touchStartX = useRef(null);
+  const touchStartY = useRef(null);
+  const isSwiping = useRef(false);
+
   const categories = [
     { key: 'all', label: 'All Concepts' },
     { key: 'concept', label: 'Core Concepts' },
@@ -20,6 +26,49 @@ export default function TheoryTab({ theory, embedded = false }) {
   );
   const currentSlide = Math.min(slide, Math.max(0, filteredTheory.length - 1));
   const item = filteredTheory[currentSlide];
+
+  // Navigate slides
+  const goToSlide = useCallback((n) => {
+    setSlide(Math.max(0, Math.min(n, filteredTheory.length - 1)));
+  }, [filteredTheory.length]);
+
+  const goPrev = useCallback(() => goToSlide(currentSlide - 1), [currentSlide, goToSlide]);
+  const goNext = useCallback(() => goToSlide(currentSlide + 1), [currentSlide, goToSlide]);
+
+  // Touch swipe handlers for mobile slide navigation
+  const handleTouchStart = useCallback((e) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    isSwiping.current = false;
+  }, []);
+
+  const handleTouchMove = useCallback((e) => {
+    if (touchStartX.current === null) return;
+    const dx = e.touches[0].clientX - touchStartX.current;
+    const dy = e.touches[0].clientY - touchStartY.current;
+    // Only consider it a horizontal swipe if dx > dy (prevents hijacking vertical scroll)
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 10) {
+      isSwiping.current = true;
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback((e) => {
+    if (touchStartX.current === null || !isSwiping.current) {
+      touchStartX.current = null;
+      touchStartY.current = null;
+      return;
+    }
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    const SWIPE_THRESHOLD = 50;
+    if (dx < -SWIPE_THRESHOLD) {
+      goNext();
+    } else if (dx > SWIPE_THRESHOLD) {
+      goPrev();
+    }
+    touchStartX.current = null;
+    touchStartY.current = null;
+    isSwiping.current = false;
+  }, [goNext, goPrev]);
 
   return (
     <div>
@@ -37,7 +86,7 @@ export default function TheoryTab({ theory, embedded = false }) {
           type="search"
           className="form-control search-bar-input"
           aria-label="Search theory concepts"
-          placeholder="Search QA concepts, methodologies, examples..."
+          placeholder="Search QA concepts..."
           value={search}
           onChange={(e) => { setSearch(e.target.value); setSlide(0); }}
         />
@@ -50,18 +99,18 @@ export default function TheoryTab({ theory, embedded = false }) {
         )}
       </div>
 
-      <div className="filter-pills" aria-label="Filter theory by category">
-        {categories.map((c) => (
-          <button key={c.key} type="button" className={`filter-pill ${tag === c.key ? 'active' : ''}`}
-            aria-pressed={tag === c.key} onClick={() => { setTag(c.key); setSlide(0); }}>
-            {c.label}
-          </button>
-        ))}
-      </div>
+        <div className="filter-pills" aria-label="Filter theory by category" role="tablist">
+          {categories.map((c) => (
+            <button key={c.key} type="button" className={`filter-pill ${tag === c.key ? 'active' : ''}`}
+              role="tab" aria-selected={tag === c.key} onClick={() => { setTag(c.key); setSlide(0); }}>
+              {c.label}
+            </button>
+          ))}
+        </div>
       </>}
 
       {!item ? (
-        <div className="card text-center" style={{ padding: 40 }}>
+        <div className="card text-center" style={{ padding: '24px 16px' }}>
           <Compass size={36} className="text-muted" style={{ margin: '0 auto 12px' }} />
           <h3>No matching terminology found</h3>
           <p className="text-muted">Try adjusting your search query or switching to &quot;All Concepts&quot;.</p>
@@ -70,7 +119,14 @@ export default function TheoryTab({ theory, embedded = false }) {
           </button>
         </div>
       ) : (
-        <section className="theory-slideshow" aria-label="Theory slideshow">
+        <section
+          className="theory-slideshow"
+          aria-label="Theory slideshow"
+          aria-roledescription="carousel"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
           <div className="theory-slide card" key={item._id || item.id}>
             <div className="card-header-row">
               <span className="theory-slide-label"><BookMarked size={16} /> THEORY CONCEPT</span>
@@ -92,12 +148,12 @@ export default function TheoryTab({ theory, embedded = false }) {
             </div>
           </div>
           <div className="theory-slide-navigation">
-            <button type="button" className="btn ghost" disabled={currentSlide === 0} onClick={() => setSlide(currentSlide - 1)}>
-              <ChevronLeft size={18} /> Previous
+            <button type="button" className="btn ghost" disabled={currentSlide === 0} onClick={goPrev} aria-label="Previous slide">
+              <ChevronLeft size={18} /> <span className="theory-nav-label">Previous</span>
             </button>
-            <span className="text-muted font-mono" aria-live="polite">Slide {currentSlide + 1} of {filteredTheory.length}</span>
-            <button type="button" className="btn ghost" disabled={currentSlide === filteredTheory.length - 1} onClick={() => setSlide(currentSlide + 1)}>
-              Next <ChevronRight size={18} />
+            <span className="text-muted font-mono" aria-live="polite">{currentSlide + 1} / {filteredTheory.length}</span>
+            <button type="button" className="btn ghost" disabled={currentSlide === filteredTheory.length - 1} onClick={goNext} aria-label="Next slide">
+              <span className="theory-nav-label">Next</span> <ChevronRight size={18} />
             </button>
           </div>
         </section>
