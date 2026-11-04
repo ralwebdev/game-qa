@@ -135,7 +135,7 @@ export default function TheoryTab({ theory, embedded = false }) {
             <h2 className="theory-slide-title">{item.title}</h2>
             <p className="theory-slide-summary">{item.summary}</p>
             <div className="theory-slide-content">
-              {item.meaning && <div><h4>Definition &amp; Meaning</h4><p>{item.meaning}</p></div>}
+              {item.meaning && <div><h4>Lesson content</h4><p style={{ whiteSpace: 'pre-line' }}>{item.meaning}</p></div>}
               {item.importance && <div><h4>Why It Matters to QA</h4><p>{item.importance}</p></div>}
               {item.example && <div className="callout-box example">
                 <div className="flex items-center gap-2 mb-1" style={{ color: '#06b6d4', fontWeight: 700 }}><Gamepad size={16} /><span>Game Scenario Example</span></div>
@@ -147,7 +147,7 @@ export default function TheoryTab({ theory, embedded = false }) {
               </div>}
             </div>
           </div>
-          <div className="theory-slide-navigation">
+          {!embedded && <div className="theory-slide-navigation">
             <button type="button" className="btn ghost" disabled={currentSlide === 0} onClick={goPrev} aria-label="Previous slide">
               <ChevronLeft size={18} /> <span className="theory-nav-label">Previous</span>
             </button>
@@ -155,7 +155,7 @@ export default function TheoryTab({ theory, embedded = false }) {
             <button type="button" className="btn ghost" disabled={currentSlide === filteredTheory.length - 1} onClick={goNext} aria-label="Next slide">
               <span className="theory-nav-label">Next</span> <ChevronRight size={18} />
             </button>
-          </div>
+          </div>}
         </section>
       )}
     </div>

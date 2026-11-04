@@ -61,11 +61,11 @@ Use `./deploy.sh --no-restart` to only install and build. The optional `--seed` 
 
 ### Adding the student sessions
 
-The seed data includes two lessons based on the student session PDFs: game-testing foundations and mobile bug identification and reporting. Related theory slides appear inside the lessons, and the full searchable glossary is available within Course. To add the new material to an existing database, back up the database and run `npm run seed --prefix server` with the intended `MONGODB_URI` configured. The seed inserts missing modules by legacy ID and theory entries by title; it does not overwrite existing records, so review any ID or title collisions in the admin editor. It also provisions an admin if the corresponding environment variables are set.
+The curriculum contains 22 individually completable modules based on the two student session PDFs, with a theory slide for each topic and a searchable glossary within Course. The normal seed inserts missing records; it does not remove old content or overwrite existing records.
 
-Lesson-to-theory associations are defined in `client/src/components/learner/CourseTab.jsx` using the seeded module legacy IDs and theory titles. If an administrator renames a seeded theory entry, update that mapping to keep the entry in its lesson. Custom theory entries remain accessible in the glossary.
+To replace an existing database's curriculum with the PDF modules, back up the database, configure the intended `MONGODB_URI`, and run `node src/replace-curriculum.js` from the `server` directory. This deletes other modules and all existing theory entries, including administrator-created content. Existing PDF module IDs are retained on repeated runs, but progress for removed modules no longer counts. Other learner records and issued certificates are not deleted. The operation is not transactional; restore the backup if it fails partway through. Theory slides are associated with modules by their `moduleLegacyId`.
 
-The new lessons are published by default. Since certificate eligibility requires completing every published module, existing learners must complete these lessons before they can become eligible or request a certificate. Previously issued certificate records are not deleted. Admins can unpublish lessons in the content editor if they should not yet count toward eligibility.
+The modules are published by default. Certificate eligibility requires completing every published module, so learners must complete all 22 modules before they can become eligible or request a certificate. Admins can unpublish modules in the content editor if they should not yet count toward eligibility.
 
 If frontend and backend are hosted on different origins, configure cookies and CSRF defense appropriately before production deployment; the supplied application assumes a same-origin reverse-proxy setup.
 
