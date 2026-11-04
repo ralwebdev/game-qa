@@ -120,7 +120,7 @@ export default function TheoryTab({ theory, embedded = false }) {
         </div>
       ) : (
         <section
-          className="theory-slideshow"
+          className={`theory-slideshow ${embedded ? 'theory-slideshow-embedded' : ''}`}
           aria-label="Theory slideshow"
           aria-roledescription="carousel"
           onTouchStart={handleTouchStart}
@@ -128,12 +128,12 @@ export default function TheoryTab({ theory, embedded = false }) {
           onTouchEnd={handleTouchEnd}
         >
           <div className="theory-slide card" key={item._id || item.id}>
-            <div className="card-header-row">
+            {!embedded && <div className="card-header-row">
               <span className="theory-slide-label"><BookMarked size={16} /> THEORY CONCEPT</span>
               <Badge text={item.tag} />
-            </div>
+            </div>}
             <h2 className="theory-slide-title">{item.title}</h2>
-            <p className="theory-slide-summary">{item.summary}</p>
+            {!embedded && <p className="theory-slide-summary">{item.summary}</p>}
             <div className="theory-slide-content">
               {item.meaning && <div><h4>Lesson content</h4><p style={{ whiteSpace: 'pre-line' }}>{item.meaning}</p></div>}
               {item.importance && <div><h4>Why It Matters to QA</h4><p>{item.importance}</p></div>}

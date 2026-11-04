@@ -75,7 +75,7 @@ export default function CourseTab({ modules, theory, user, setUser, run, setNoti
   };
 
   // Expand / collapse all modules in the current session
-  const anyOpen = Object.values(openLessons).some(Boolean);
+  const anyOpen = filteredModules.some((module) => openLessons[module._id]);
   const toggleAllLessons = () => {
     if (anyOpen) {
       setOpenLessons({});
@@ -105,7 +105,7 @@ export default function CourseTab({ modules, theory, user, setUser, run, setNoti
   };
 
   return (
-    <div>
+    <div className="course-page">
       {/* Top Header */}
       <div className="page-header">
         <div>
@@ -122,30 +122,30 @@ export default function CourseTab({ modules, theory, user, setUser, run, setNoti
       </div>
 
       {/* Primary Navigation Pills: Session 1 and Session 2 */}
-      <div className="filter-pills" aria-label="Course session views" role="tablist">
+      <div className="filter-pills course-session-tabs" aria-label="Course sessions" role="group">
         <button
           type="button"
           className={`filter-pill ${session === 1 ? 'active' : ''}`}
-          role="tab"
-          aria-selected={session === 1}
+          aria-pressed={session === 1}
           onClick={() => {
             setSearchParams({});
             setSearchQuery('');
           }}
         >
-          Session 1: Foundations ({s1Completed}/{sessionOneModules.length})
+          <span>Session 1 <span className="course-session-name">· Foundations</span></span>
+          <span className="course-session-count">{s1Completed}/{sessionOneModules.length}</span>
         </button>
         <button
           type="button"
           className={`filter-pill ${session === 2 ? 'active' : ''}`}
-          role="tab"
-          aria-selected={session === 2}
+          aria-pressed={session === 2}
           onClick={() => {
             setSearchParams({ session: '2' });
             setSearchQuery('');
           }}
         >
-          Session 2: Mobile QA ({s2Completed}/{sessionTwoModules.length})
+          <span>Session 2 <span className="course-session-name">· Mobile QA</span></span>
+          <span className="course-session-count">{s2Completed}/{sessionTwoModules.length}</span>
         </button>
       </div>
 
@@ -207,11 +207,12 @@ export default function CourseTab({ modules, theory, user, setUser, run, setNoti
             </div>
 
             {/* Status Filter & Accordion Toggle */}
-            <div className="flex items-center gap-2 justify-between flex-wrap">
+            <div className="course-filter-actions">
               <div className="course-status-filters" role="group" aria-label="Status filter">
                 <button
                   type="button"
                   className={`filter-pill ${statusFilter === 'all' ? 'active' : ''}`}
+                  aria-pressed={statusFilter === 'all'}
                   onClick={() => setStatusFilter('all')}
                 >
                   All ({activeSessionModules.length})
@@ -219,6 +220,7 @@ export default function CourseTab({ modules, theory, user, setUser, run, setNoti
                 <button
                   type="button"
                   className={`filter-pill ${statusFilter === 'todo' ? 'active' : ''}`}
+                  aria-pressed={statusFilter === 'todo'}
                   onClick={() => setStatusFilter('todo')}
                 >
                   To Do ({activeSessionModules.length - currentCompleted})
@@ -226,6 +228,7 @@ export default function CourseTab({ modules, theory, user, setUser, run, setNoti
                 <button
                   type="button"
                   className={`filter-pill ${statusFilter === 'completed' ? 'active' : ''}`}
+                  aria-pressed={statusFilter === 'completed'}
                   onClick={() => setStatusFilter('completed')}
                 >
                   Completed ({currentCompleted})
@@ -235,7 +238,7 @@ export default function CourseTab({ modules, theory, user, setUser, run, setNoti
               {filteredModules.length > 0 && (
                 <button
                   type="button"
-                  className="btn ghost sm"
+                  className="btn ghost sm course-expand-all"
                   style={{ fontSize: '0.78rem', whiteSpace: 'nowrap' }}
                   onClick={toggleAllLessons}
                   title="Expand or collapse all modules on this screen"
@@ -279,12 +282,10 @@ export default function CourseTab({ modules, theory, user, setUser, run, setNoti
                 const isDone = completed.includes(m._id);
                 const isAnswerRevealed = !!openQuizAnswers[m._id];
                 const isOpen = !!openLessons[m._id];
-                const cleanSummary = (m.summary || '').replace(/\s*\?\s*/g, ' • ');
                 const relatedTheory = theory.filter(
                   (item) => item.moduleLegacyId === m.legacyId || (item.title && m.title && item.title.trim().toLowerCase() === m.title.trim().toLowerCase())
                 );
                 const pdf = pdfForModule(m.legacyId);
-                const pdfUrl = pdf && `${import.meta.env.BASE_URL}course-materials/session-${pdf.session}-page-${pdf.page}.pdf`;
                 const slideUrl = pdf && `${import.meta.env.BASE_URL}slides/session-${pdf.session}/slide-${String(pdf.page).padStart(2, '0')}.webp`;
 
                 return (
@@ -314,13 +315,6 @@ export default function CourseTab({ modules, theory, user, setUser, run, setNoti
                       />
                     </div>
 
-                    {/* Brief Summary */}
-                    {cleanSummary && (
-                      <p className="text-muted" style={{ fontSize: '0.88rem', margin: '6px 0 10px', lineHeight: 1.5 }}>
-                        {cleanSummary}
-                      </p>
-                    )}
-
                     {/* Mobile-Friendly Accordion Trigger */}
                     <button
                       type="button"
@@ -332,7 +326,7 @@ export default function CourseTab({ modules, theory, user, setUser, run, setNoti
                         <BookOpen size={16} />
                         <span>{isOpen ? 'Close Lesson' : 'Open Lesson & Theory Slides'}</span>
                       </div>
-                      {isOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                      <ChevronDown size={18} className="module-toggle-chevron" aria-hidden="true" />
                     </button>
 
                     {/* Expanded Lesson Content */}
@@ -340,25 +334,22 @@ export default function CourseTab({ modules, theory, user, setUser, run, setNoti
                       <div className="lesson-expanded-content">
                         {pdf && (
                           <div className="lesson-section">
-                            <div className="lesson-section-header">
-                              <BookOpen size={15} style={{ color: '#a3e635' }} />
-                              <span>Session {pdf.session} · Slide {pdf.page}</span>
-                            </div>
                             <img className="lesson-slide-image" src={slideUrl} alt={`Session ${pdf.session}, slide ${pdf.page}: ${m.title}`} loading="lazy" />
-                            <a className="btn ghost sm" href={pdfUrl} target="_blank" rel="noreferrer">
-                              Open this slide as PDF
+                            <a className="course-slide-zoom" href={slideUrl} target="_blank" rel="noreferrer" aria-label={`Open full-size slide for ${m.title}`}>
+                              Open full-size slide
                             </a>
                           </div>
                         )}
                         {/* 1. Related Theory Slides */}
                         {relatedTheory.length > 0 && (
-                          <div className="lesson-section">
-                            <div className="lesson-section-header">
-                              <BookOpen size={15} style={{ color: '#a3e635' }} />
-                              <span>Curriculum Theory Slide</span>
-                            </div>
+                          <details className="lesson-section theory-concept-accordion">
+                            <summary>
+                              <BookOpen size={16} />
+                              <span>Theory concept</span>
+                              <ChevronDown size={18} className="theory-concept-chevron" />
+                            </summary>
                             <TheoryTab theory={relatedTheory} embedded />
-                          </div>
+                          </details>
                         )}
 
                         {/* 2. Explanation & Core Principles */}
