@@ -148,7 +148,7 @@ export default function AdminDashboard({ run, setNotice }) {
             <StatCard label="Submitted Bug Reports" value={stats?.bugs ?? bugs.length} icon={Bug} variant="amber" />
             <StatCard label="Authored Test Cases" value={stats?.cases ?? cases.length} icon={FileCheck} variant="indigo" />
             <StatCard label="Learner Reviews" value={stats?.feedback ?? feedback.length} icon={MessageSquare} variant="cyan" />
-            <StatCard label="Issued Certificates" value={stats?.certificates ?? certificates.length} icon={Award} variant="emerald" />
+            <StatCard label="Issued Certificates" value={stats?.certificates ?? certificates.filter(c => c.recipientName).length} icon={Award} variant="emerald" />
           </div>
 
           <div className="card">
@@ -204,6 +204,9 @@ export default function AdminDashboard({ run, setNotice }) {
                     <td><span className="font-mono">{u.caseCount ?? 0}</span></td>
                     <td>
                       <div className="admin-certificate-action">
+                        <span className={`badge ${u.certificate?.recipientName ? 'badge-success' : 'badge-neutral'}`}>
+                          {u.certificate?.recipientName ? 'Issued' : u.certificate ? 'Request pending' : 'No request'}
+                        </span>
                         <input
                           className="form-control"
                           type="text"
@@ -224,6 +227,10 @@ export default function AdminDashboard({ run, setNotice }) {
                         />
                         <button type="button" className="btn sm primary" disabled={!(certificateNames[u._id] ?? u.certificate?.recipientName ?? '').trim()} onClick={() => run(async () => {
                           await post(`/admin/users/${u._id}/certificate`, { recipientName: certificateNames[u._id] ?? u.certificate?.recipientName ?? '', remarks: certificateRemarks[u._id] ?? u.certificate?.remarks ?? '' });
+                          const [updatedUsers, updatedCertificates, updatedStats] = await Promise.all([api('/admin/users'), api('/admin/certificates'), api('/admin/stats')]);
+                          setUsers(updatedUsers);
+                          setCertificates(updatedCertificates);
+                          setStats(updatedStats);
                           setNotice(u.certificate?.recipientName ? `Certificate updated for ${u.name}.` : `Certificate name approved for ${u.name}.`);
                         })}>
                           <Award size={14} /> {u.certificate?.recipientName ? 'Update Certificate' : 'Issue Certificate'}
@@ -464,9 +471,9 @@ export default function AdminDashboard({ run, setNotice }) {
         <div className="card">
           <div className="card-header-row">
             <div>
-              <h2 style={{ margin: 0 }}>Official Certificates Registry ({certificates.length})</h2>
+              <h2 style={{ margin: 0 }}>Certificate Requests &amp; Records ({certificates.length})</h2>
               <p className="text-muted text-sm mt-1">
-                Canonical cryptographic records of all course completions issued by the academy.
+                Pending requests await a recipient name. Issue certificates from the Learners tab.
               </p>
             </div>
           </div>
@@ -478,7 +485,8 @@ export default function AdminDashboard({ run, setNotice }) {
                   <th>Verification Code</th>
                   <th>Learner Name</th>
                   <th>Learner Email</th>
-                  <th>Issued Date</th>
+                  <th>Status</th>
+                  <th>Record Created</th>
                 </tr>
               </thead>
               <tbody>
@@ -492,6 +500,11 @@ export default function AdminDashboard({ run, setNotice }) {
                     </td>
                     <td>
                       <span className="text-dim font-mono">{c.user?.email}</span>
+                    </td>
+                    <td>
+                      <span className={`badge ${c.recipientName ? 'badge-success' : 'badge-neutral'}`}>
+                        {c.recipientName ? 'Issued' : 'Request pending'}
+                      </span>
                     </td>
                     <td>
                       <span className="font-mono">
