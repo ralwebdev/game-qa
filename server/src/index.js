@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express'; import mongoose from 'mongoose'; import bcrypt from 'bcryptjs'; import jwt from 'jsonwebtoken'; import cookieParser from 'cookie-parser'; import cors from 'cors'; import helmet from 'helmet'; import rateLimit from 'express-rate-limit'; import crypto from 'crypto'; import path from 'path'; import { fileURLToPath } from 'url';
 import { User, Bug, TestCase, Feedback, Certificate } from './models.js';
 import { modules as courseModules, theory as courseTheory, completedIds } from './curriculum.js';
+import { createBugWorkbook } from './bug-export.js';
 if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) { console.error('Set JWT_SECRET to at least 32 characters'); process.exit(1) }
 const app = express(); app.disable('x-powered-by'); app.use(helmet({ contentSecurityPolicy: false })); app.use(cors({ origin: process.env.CLIENT_ORIGIN || 'http://localhost:5173', credentials: true })); app.use(express.json({ limit: '1mb' })); app.use(cookieParser());
 const api = express.Router(); app.use('/api', api);
@@ -50,6 +51,13 @@ api.post('/admin/users/:id/certificate', auth, admin, asyncHandler(async (req, r
 }));
 api.patch('/admin/users/:id', auth, admin, asyncHandler(async (req, res) => { const u = await User.findOne({ _id: req.params.id, role: 'learner' }); if (!u) return res.status(404).json({ message: 'Learner not found' }); if (typeof req.body.disabled === 'boolean') u.disabled = req.body.disabled; await u.save(); res.json(safeUser(u)) }));
 api.put('/admin/users/:id/certificate-file', auth, admin, express.raw({ type: ['application/pdf', 'image/png', 'image/jpeg'], limit: '10mb' }), asyncHandler(async (req, res) => { if (!mongoose.isValidObjectId(req.params.id)) return res.status(400).json({ message: 'Invalid learner' }); const learner = await User.exists({ _id: req.params.id, role: 'learner' }); if (!learner) return res.status(404).json({ message: 'Learner not found' }); if (!Buffer.isBuffer(req.body) || !req.body.length) return res.status(400).json({ message: 'Choose a PDF, PNG, or JPEG certificate file' }); const contentType = req.get('content-type'); const suppliedName = decodeURIComponent(req.get('x-file-name') || 'certificate'); const fileName = (path.basename(suppliedName).replace(/[^a-zA-Z0-9._ -]/g, '_').slice(0, 150) || 'certificate'); const cert = await Certificate.findOneAndUpdate({ user: req.params.id }, { $set: { fileName, fileContentType: contentType, fileData: req.body }, $setOnInsert: { code: 'GQA-' + crypto.randomBytes(7).toString('hex').toUpperCase(), issuedAt: new Date() } }, { new: true, upsert: true, setDefaultsOnInsert: true }); res.json({ code: cert.code, fileName: cert.fileName, issuedAt: cert.issuedAt }) }));
+api.get('/admin/bugs/export', auth, admin, asyncHandler(async (req, res) => {
+  const bugs = await Bug.find().populate('user', 'name email').sort({ createdAt: -1 }).lean();
+  const workbook = await createBugWorkbook(bugs);
+  res.set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  res.set('Content-Disposition', 'attachment; filename="bug-reports.xlsx"');
+  res.send(Buffer.from(workbook));
+}));
 for (const [key, Model] of [['bugs', Bug], ['cases', TestCase]]) { api.get('/admin/' + key, auth, admin, asyncHandler(async (req, res) => res.json(await Model.find().populate('user', 'name email').sort({ createdAt: -1 }).limit(500)))); api.patch('/admin/' + key + '/:id/review', auth, admin, asyncHandler(async (req, res) => { if (!['submitted', 'reviewed', 'needs_changes'].includes(req.body.status)) return res.status(400).json({ message: 'Invalid review status' }); const d = await Model.findByIdAndUpdate(req.params.id, { $set: { status: req.body.status, reviewNote: clean(req.body.reviewNote, 1000) } }, { new: true }); if (!d) return res.status(404).json({ message: 'Not found' }); res.json(d) })) }
 api.get('/admin/feedback', auth, admin, asyncHandler(async (req, res) => res.json(await Feedback.find().populate('user', 'name email').sort({ createdAt: -1 }).limit(500))));
 api.patch('/admin/feedback/:id', auth, admin, asyncHandler(async (req, res) => { const v = await Feedback.findByIdAndUpdate(req.params.id, { $set: { adminReply: clean(req.body.adminReply, 1000) } }, { new: true }); if (!v) return res.status(404).json({ message: 'Not found' }); res.json(v) }));

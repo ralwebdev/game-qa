@@ -10,7 +10,8 @@ import {
   ShieldCheck, 
   CheckCircle, 
   XCircle, 
-  Send 
+  Send,
+  Download
 } from 'lucide-react';
 import StatCard from '../common/StatCard';
 import Badge from '../common/Badge';
@@ -31,6 +32,28 @@ export default function AdminDashboard({ run, setNotice }) {
   const [replies, setReplies] = useState({});
   const [certificateRemarks, setCertificateRemarks] = useState({});
   const [certificateNames, setCertificateNames] = useState({});
+  const [exportingBugs, setExportingBugs] = useState(false);
+
+  const downloadBugs = () => run(async () => {
+    setExportingBugs(true);
+    try {
+      const response = await fetch('/api/admin/bugs/export', { credentials: 'include' });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.message || 'Could not download bug reports');
+      }
+      const url = URL.createObjectURL(await response.blob());
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'bug-reports.xlsx';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } finally {
+      setExportingBugs(false);
+    }
+  });
 
   useEffect(() => {
     Promise.all([
@@ -274,6 +297,11 @@ export default function AdminDashboard({ run, setNotice }) {
                 Evaluate student submissions, mark review statuses, and provide actionable mentor feedback.
               </p>
             </div>
+            {tab === 'bugs' && (
+              <button type="button" className="btn primary" onClick={downloadBugs} disabled={exportingBugs}>
+                <Download size={16} /> {exportingBugs ? 'Preparing Excel...' : 'Download Excel'}
+              </button>
+            )}
           </div>
 
           <div style={{ display: 'grid', gap: 16 }}>
