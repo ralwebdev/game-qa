@@ -179,6 +179,8 @@ export default function AdminDashboard({ run, setNotice }) {
                   <th>Learner</th>
                   <th>Role</th>
                   <th>Modules Done</th>
+                  <th>Bug Reports</th>
+                  <th>Test Cases</th>
                   <th>Certificate &amp; Remarks</th>
                   <th>Actions</th>
                 </tr>
@@ -198,6 +200,8 @@ export default function AdminDashboard({ run, setNotice }) {
                         {u.completedModules?.length || 0} / {modules.length}
                       </span>
                     </td>
+                    <td><span className="font-mono">{u.bugCount ?? 0}</span></td>
+                    <td><span className="font-mono">{u.caseCount ?? 0}</span></td>
                     <td>
                       <div className="admin-certificate-action">
                         <input

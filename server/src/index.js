@@ -36,7 +36,19 @@ api.post('/certificates/issue', auth, asyncHandler(async (req, res) => { const [
 api.get('/certificates/download', auth, asyncHandler(async (req, res) => { const cert = await Certificate.findOne({ user: req.user._id }).select('+fileData fileName fileContentType'); if (!cert?.fileData) return res.status(404).json({ message: 'No uploaded certificate is available' }); res.type(cert.fileContentType || 'application/octet-stream'); res.attachment(cert.fileName || 'certificate'); res.send(cert.fileData) }));
 api.get('/certificates/verify/:code', asyncHandler(async (req, res) => { const cert = await Certificate.findOne({ code: req.params.code }); if (!cert?.recipientName) return res.status(404).json({ message: 'Certificate not found or awaiting administrator approval' }); res.json({ code: cert.code, learner: cert.recipientName, issuedAt: cert.issuedAt, course: 'Scope GT', note: 'Course completion, not an accredited professional certification' }) }));
 api.get('/admin/stats', auth, admin, asyncHandler(async (req, res) => { const [learners, bugs, cases, feedback, certificates] = await Promise.all([User.countDocuments({ role: 'learner' }), Bug.countDocuments(), TestCase.countDocuments(), Feedback.countDocuments(), Certificate.countDocuments()]); res.json({ learners, modules: courseModules.length, bugs, cases, feedback, certificates }) }));
-api.get('/admin/users', auth, admin, asyncHandler(async (req, res) => { const users = await User.find({ role: 'learner' }).sort({ createdAt: -1 }).limit(500).select('-passwordHash').lean(); const certificates = await Certificate.find({ user: { $in: users.map(u => u._id) } }).select('user fileName issuedAt remarks recipientName').lean(); const byUser = new Map(certificates.map(c => [String(c.user), c])); res.json(users.map(u => ({ ...u, completedModules: completedIds(u), certificate: byUser.get(String(u._id)) || null }))) }));
+api.get('/admin/users', auth, admin, asyncHandler(async (req, res) => {
+  const users = await User.find({ role: 'learner' }).sort({ createdAt: -1 }).limit(500).select('-passwordHash').lean();
+  const userIds = users.map(u => u._id);
+  const countByUser = Model => Model.aggregate([{ $match: { user: { $in: userIds } } }, { $group: { _id: '$user', count: { $sum: 1 } } }]);
+  const [certificates, bugCounts, caseCounts] = await Promise.all([
+    Certificate.find({ user: { $in: userIds } }).select('user fileName issuedAt remarks recipientName').lean(),
+    countByUser(Bug), countByUser(TestCase)
+  ]);
+  const byUser = new Map(certificates.map(c => [String(c.user), c]));
+  const bugsByUser = new Map(bugCounts.map(c => [String(c._id), c.count]));
+  const casesByUser = new Map(caseCounts.map(c => [String(c._id), c.count]));
+  res.json(users.map(u => ({ ...u, completedModules: completedIds(u), certificate: byUser.get(String(u._id)) || null, bugCount: bugsByUser.get(String(u._id)) || 0, caseCount: casesByUser.get(String(u._id)) || 0 })));
+}));
 api.post('/admin/users/:id/certificate', auth, admin, asyncHandler(async (req, res) => {
   if (!mongoose.isValidObjectId(req.params.id)) return res.status(400).json({ message: 'Invalid learner' });
   if (typeof req.body?.recipientName !== 'string' || !req.body.recipientName.trim() || req.body.recipientName.trim().length > 120) return res.status(400).json({ message: 'Enter a certificate recipient name of up to 120 characters' });
