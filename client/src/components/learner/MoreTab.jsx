@@ -175,7 +175,7 @@ export default function MoreTab({ user, setUser, dash, bugs, cases, feedback, go
         ) : (
           <div>
             <p className="text-muted">
-              Complete all published lessons, log at least 1 bug report, and author 1 test case to unlock your verifiable certificate.
+              Complete at least 22 modules and have at least 2 bug reports marked reviewed by an administrator to request your certificate.
             </p>
             <button
               type="button"

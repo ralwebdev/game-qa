@@ -134,35 +134,24 @@ export default function HomeTab({ user, dash, modules, bugs, cases, go, run, set
         {/* Milestone Checklist */}
         <div className="space-y-2 mb-4" style={{ display: 'grid', gap: 10 }}>
           <div className="flex items-center gap-3 text-sm">
-            {completedCount === totalModules && totalModules > 0 ? (
+            {completedCount >= 22 ? (
               <CheckCircle2 size={18} style={{ color: '#10b981' }} />
             ) : (
               <Circle size={18} style={{ color: '#64748b' }} />
             )}
-            <span style={{ color: completedCount === totalModules && totalModules > 0 ? '#f8fafc' : '#94a3b8' }}>
-              Complete all {totalModules} curriculum modules ({completedCount}/{totalModules})
+            <span style={{ color: completedCount >= 22 ? '#f8fafc' : '#94a3b8' }}>
+              Complete at least 22 curriculum modules ({completedCount}/22)
             </span>
           </div>
 
           <div className="flex items-center gap-3 text-sm">
-            {bugs.length > 0 ? (
+            {(dash?.validBugs ?? 0) >= 2 ? (
               <CheckCircle2 size={18} style={{ color: '#10b981' }} />
             ) : (
               <Circle size={18} style={{ color: '#64748b' }} />
             )}
-            <span style={{ color: bugs.length > 0 ? '#f8fafc' : '#94a3b8' }}>
-              Log at least 1 professional defect report ({bugs.length} logged)
-            </span>
-          </div>
-
-          <div className="flex items-center gap-3 text-sm">
-            {cases.length > 0 ? (
-              <CheckCircle2 size={18} style={{ color: '#10b981' }} />
-            ) : (
-              <Circle size={18} style={{ color: '#64748b' }} />
-            )}
-            <span style={{ color: cases.length > 0 ? '#f8fafc' : '#94a3b8' }}>
-              Author at least 1 test case specification ({cases.length} authored)
+            <span style={{ color: (dash?.validBugs ?? 0) >= 2 ? '#f8fafc' : '#94a3b8' }}>
+              Have at least 2 bug reports marked reviewed by an administrator ({dash?.validBugs ?? 0}/2)
             </span>
           </div>
         </div>

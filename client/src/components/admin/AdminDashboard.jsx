@@ -167,7 +167,7 @@ export default function AdminDashboard({ run, setNotice }) {
             <div>
               <h2 style={{ margin: 0 }}>Learner Accounts ({users.length})</h2>
               <p className="text-muted text-sm mt-1">
-                Set the certificate name and issue certificates with optional learner-visible remarks. Only administrators can change certificate names.
+                Certificates require at least 22 completed modules and 2 bug reports marked reviewed. Administrators set the certificate name and may add remarks.
               </p>
             </div>
           </div>
@@ -200,7 +200,7 @@ export default function AdminDashboard({ run, setNotice }) {
                         {u.completedModules?.length || 0} / {modules.length}
                       </span>
                     </td>
-                    <td><span className="font-mono">{u.bugCount ?? 0}</span></td>
+                    <td><span className="font-mono">{u.bugCount ?? 0} ({u.validBugs ?? 0} reviewed)</span></td>
                     <td><span className="font-mono">{u.caseCount ?? 0}</span></td>
                     <td>
                       <div className="admin-certificate-action">
@@ -225,7 +225,7 @@ export default function AdminDashboard({ run, setNotice }) {
                           value={certificateRemarks[u._id] ?? u.certificate?.remarks ?? ''}
                           onChange={(event) => setCertificateRemarks((prev) => ({ ...prev, [u._id]: event.target.value }))}
                         />
-                        <button type="button" className="btn sm primary" disabled={!(certificateNames[u._id] ?? u.certificate?.recipientName ?? '').trim()} onClick={() => run(async () => {
+                        <button type="button" className="btn sm primary" disabled={!u.eligible || !(certificateNames[u._id] ?? u.certificate?.recipientName ?? '').trim()} onClick={() => run(async () => {
                           await post(`/admin/users/${u._id}/certificate`, { recipientName: certificateNames[u._id] ?? u.certificate?.recipientName ?? '', remarks: certificateRemarks[u._id] ?? u.certificate?.remarks ?? '' });
                           const [updatedUsers, updatedCertificates, updatedStats] = await Promise.all([api('/admin/users'), api('/admin/certificates'), api('/admin/stats')]);
                           setUsers(updatedUsers);

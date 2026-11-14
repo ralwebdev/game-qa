@@ -3,6 +3,7 @@ import express from 'express'; import mongoose from 'mongoose'; import bcrypt fr
 import { User, Bug, TestCase, Feedback, Certificate } from './models.js';
 import { modules as courseModules, theory as courseTheory, completedIds } from './curriculum.js';
 import { createBugWorkbook } from './bug-export.js';
+import { certificateProgress } from './certificate-eligibility.js';
 if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) { console.error('Set JWT_SECRET to at least 32 characters'); process.exit(1) }
 const app = express(); app.disable('x-powered-by'); app.use(helmet({ contentSecurityPolicy: false })); app.use(cors({ origin: process.env.CLIENT_ORIGIN || 'http://localhost:5173', credentials: true })); app.use(express.json({ limit: '1mb' })); app.use(cookieParser());
 const api = express.Router(); app.use('/api', api);
@@ -24,7 +25,7 @@ api.get('/auth/me', auth, (req, res) => res.json({ user: safeUser(req.user) }));
 api.patch('/auth/me', auth, asyncHandler(async (req, res) => { if (req.body.name !== undefined) { const name = clean(req.body.name, 80); if (!name) return res.status(400).json({ message: 'Name required' }); req.user.name = name } if (['Student', 'Aspiring Tester', 'Working Professional'].includes(req.body.learnerRole)) req.user.learnerRole = req.body.learnerRole; if (req.body.devices !== undefined) { const devices = cleanDevices(req.body.devices); if (!devices) return res.status(400).json({ message: 'Each device needs a platform, model and OS version' }); req.user.devices = devices; req.user.device = devices[0].device; req.user.os = devices[0].os } if (req.body.device !== undefined || req.body.os !== undefined) { const device = clean(req.body.device, 200), os = clean(req.body.os, 100); if (!device || !os) return res.status(400).json({ message: 'Device model and Android version required' }); req.user.device = device; req.user.os = os } await req.user.save(); res.json({ user: safeUser(req.user) }) }));
 api.get('/modules', auth, (req, res) => res.json(courseModules));
 api.get('/theory', auth, (req, res) => res.json(courseTheory));
-api.get('/dashboard', auth, asyncHandler(async (req, res) => { const [bugs, cases, certificate] = await Promise.all([Bug.countDocuments({ user: req.user._id }), TestCase.countDocuments({ user: req.user._id }), Certificate.findOne({ user: req.user._id }).select('code issuedAt fileName remarks recipientName')]); const done = new Set(completedIds(req.user)); const completed = courseModules.filter(m => done.has(m._id)).length; res.json({ modules: courseModules.length, completed, bugs, cases, eligible: courseModules.length > 0 && completed === courseModules.length && bugs > 0 && cases > 0, certificate }) }));
+api.get('/dashboard', auth, asyncHandler(async (req, res) => { const [bugs, validBugs, cases, certificate] = await Promise.all([Bug.countDocuments({ user: req.user._id }), Bug.countDocuments({ user: req.user._id, status: 'reviewed' }), TestCase.countDocuments({ user: req.user._id }), Certificate.findOne({ user: req.user._id }).select('code issuedAt fileName remarks recipientName')]); const progress = certificateProgress(req.user, courseModules, validBugs); res.json({ modules: courseModules.length, ...progress, bugs, cases, certificate }) }));
 api.post('/modules/:id/complete', auth, asyncHandler(async (req, res) => { const m = courseModules.find(item => item._id === req.params.id); if (!m) return res.status(404).json({ message: 'Module unavailable' }); await User.findByIdAndUpdate(req.user._id, { $addToSet: { completedCourseModules: m.legacyId } }); res.json({ ok: true }) }));
 const bugFields = ['title', 'category', 'description', 'device', 'severity', 'priority', 'steps', 'expected', 'actual', 'appName', 'build', 'os', 'frequency', 'preconditions', 'impact', 'media', 'notes']; const caseFields = ['feature', 'objective', 'preconditions', 'steps', 'expected', 'result'];
 function pick(body, fields) { return Object.fromEntries(fields.filter(k => body[k] !== undefined).map(k => [k, clean(body[k])])) }
@@ -32,28 +33,32 @@ function crud(resource, fields, required) { api.get('/' + resource, auth, asyncH
 crud('bugs', bugFields, ['title', 'category', 'device', 'os', 'severity', 'priority', 'steps', 'expected', 'actual']); crud('cases', caseFields, ['feature', 'objective', 'steps', 'expected']);
 api.post('/feedback', auth, asyncHandler(async (req, res) => { const message = clean(req.body.message, 3000), rating = Number(req.body.rating); if (!message || !Number.isInteger(rating) || rating < 1 || rating > 5) return res.status(400).json({ message: 'Rating (1-5) and message required' }); res.status(201).json(await Feedback.create({ user: req.user._id, rating, message })) }));
 api.get('/feedback', auth, asyncHandler(async (req, res) => res.json(await Feedback.find({ user: req.user._id }).sort({ createdAt: -1 }))));
-api.post('/certificates/issue', auth, asyncHandler(async (req, res) => { const [bugs, cases] = await Promise.all([Bug.countDocuments({ user: req.user._id }), TestCase.countDocuments({ user: req.user._id })]); const done = new Set(completedIds(req.user)); if (!courseModules.length || !courseModules.every(m => done.has(m._id)) || !bugs || !cases) return res.status(403).json({ message: 'Complete all course modules and create at least one bug report and test case' }); let cert = await Certificate.findOne({ user: req.user._id }); if (!cert) cert = await Certificate.create({ user: req.user._id, code: 'GQA-' + crypto.randomBytes(7).toString('hex').toUpperCase() }); res.json(cert) }));
+api.post('/certificates/issue', auth, asyncHandler(async (req, res) => { const validBugs = await Bug.countDocuments({ user: req.user._id, status: 'reviewed' }); if (!certificateProgress(req.user, courseModules, validBugs).eligible) return res.status(403).json({ message: 'Complete at least 22 course modules and have at least 2 bug reports marked reviewed by an administrator' }); let cert = await Certificate.findOne({ user: req.user._id }); if (!cert) cert = await Certificate.create({ user: req.user._id, code: 'GQA-' + crypto.randomBytes(7).toString('hex').toUpperCase() }); res.json(cert) }));
 api.get('/certificates/download', auth, asyncHandler(async (req, res) => { const cert = await Certificate.findOne({ user: req.user._id }).select('+fileData fileName fileContentType'); if (!cert?.fileData) return res.status(404).json({ message: 'No uploaded certificate is available' }); res.type(cert.fileContentType || 'application/octet-stream'); res.attachment(cert.fileName || 'certificate'); res.send(cert.fileData) }));
 api.get('/certificates/verify/:code', asyncHandler(async (req, res) => { const cert = await Certificate.findOne({ code: req.params.code }); if (!cert?.recipientName) return res.status(404).json({ message: 'Certificate not found or awaiting administrator approval' }); res.json({ code: cert.code, learner: cert.recipientName, issuedAt: cert.issuedAt, course: 'Scope GT', note: 'Course completion, not an accredited professional certification' }) }));
 api.get('/admin/stats', auth, admin, asyncHandler(async (req, res) => { const [learners, bugs, cases, feedback, certificates] = await Promise.all([User.countDocuments({ role: 'learner' }), Bug.countDocuments(), TestCase.countDocuments(), Feedback.countDocuments(), Certificate.countDocuments({ recipientName: { $exists: true, $nin: ['', null] } })]); res.json({ learners, modules: courseModules.length, bugs, cases, feedback, certificates }) }));
 api.get('/admin/users', auth, admin, asyncHandler(async (req, res) => {
   const users = await User.find({ role: 'learner' }).sort({ createdAt: -1 }).limit(500).select('-passwordHash').lean();
   const userIds = users.map(u => u._id);
-  const countByUser = Model => Model.aggregate([{ $match: { user: { $in: userIds } } }, { $group: { _id: '$user', count: { $sum: 1 } } }]);
-  const [certificates, bugCounts, caseCounts] = await Promise.all([
+  const countByUser = (Model, filter = {}) => Model.aggregate([{ $match: { user: { $in: userIds }, ...filter } }, { $group: { _id: '$user', count: { $sum: 1 } } }]);
+  const [certificates, bugCounts, caseCounts, validBugCounts] = await Promise.all([
     Certificate.find({ user: { $in: userIds } }).select('user fileName issuedAt remarks recipientName').lean(),
-    countByUser(Bug), countByUser(TestCase)
+    countByUser(Bug), countByUser(TestCase), countByUser(Bug, { status: 'reviewed' })
   ]);
   const byUser = new Map(certificates.map(c => [String(c.user), c]));
   const bugsByUser = new Map(bugCounts.map(c => [String(c._id), c.count]));
+  const validBugsByUser = new Map(validBugCounts.map(c => [String(c._id), c.count]));
   const casesByUser = new Map(caseCounts.map(c => [String(c._id), c.count]));
-  res.json(users.map(u => ({ ...u, completedModules: completedIds(u), certificate: byUser.get(String(u._id)) || null, bugCount: bugsByUser.get(String(u._id)) || 0, caseCount: casesByUser.get(String(u._id)) || 0 })));
+  res.json(users.map(u => ({ ...u, completedModules: completedIds(u), certificate: byUser.get(String(u._id)) || null, ...certificateProgress(u, courseModules, validBugsByUser.get(String(u._id)) || 0), bugCount: bugsByUser.get(String(u._id)) || 0, caseCount: casesByUser.get(String(u._id)) || 0 })));
 }));
 api.post('/admin/users/:id/certificate', auth, admin, asyncHandler(async (req, res) => {
   if (!mongoose.isValidObjectId(req.params.id)) return res.status(400).json({ message: 'Invalid learner' });
   if (typeof req.body?.recipientName !== 'string' || !req.body.recipientName.trim() || req.body.recipientName.trim().length > 120) return res.status(400).json({ message: 'Enter a certificate recipient name of up to 120 characters' });
   if (typeof req.body?.remarks !== 'string' || req.body.remarks.length > 1000) return res.status(400).json({ message: 'Remarks must be at most 1000 characters' });
-  if (!await User.exists({ _id: req.params.id, role: 'learner' })) return res.status(404).json({ message: 'Learner not found' });
+  const learner = await User.findOne({ _id: req.params.id, role: 'learner' });
+  if (!learner) return res.status(404).json({ message: 'Learner not found' });
+  const validBugs = await Bug.countDocuments({ user: learner._id, status: 'reviewed' });
+  if (!certificateProgress(learner, courseModules, validBugs).eligible) return res.status(403).json({ message: 'Learner must complete at least 22 course modules and have at least 2 bug reports marked reviewed' });
   const certificate = await Certificate.findOneAndUpdate(
     { user: req.params.id },
     { $set: { recipientName: req.body.recipientName.trim(), remarks: req.body.remarks.trim() }, $setOnInsert: { code: 'GQA-' + crypto.randomBytes(7).toString('hex').toUpperCase(), issuedAt: new Date() } },
