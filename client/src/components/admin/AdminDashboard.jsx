@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Users, 
   BookOpen, 
@@ -38,6 +38,14 @@ export default function AdminDashboard({ run, setNotice }) {
   const [certificateRemarks, setCertificateRemarks] = useState({});
   const [certificateNames, setCertificateNames] = useState({});
   const [exportingBugs, setExportingBugs] = useState(false);
+  const [certificateDialog, setCertificateDialog] = useState(null);
+  const [savingCertificate, setSavingCertificate] = useState(false);
+  const [certificateError, setCertificateError] = useState('');
+  const certificateDialogRef = useRef(null);
+
+  useEffect(() => {
+    if (certificateDialog && certificateDialogRef.current && !certificateDialogRef.current.open) certificateDialogRef.current.showModal();
+  }, [certificateDialog]);
 
   const downloadBugs = () => run(async () => {
     setExportingBugs(true);
@@ -103,19 +111,40 @@ export default function AdminDashboard({ run, setNotice }) {
     });
   };
 
-  const saveCertificate = (learner, certificate) => run(async () => {
-    await post(`/admin/users/${learner._id}/certificate`, {
-      recipientName: certificateNames[learner._id] ?? certificate?.recipientName ?? learner.name,
-      remarks: certificateRemarks[learner._id] ?? certificate?.remarks ?? ''
+  const openCertificateDialog = (learner, certificate) => {
+    setCertificateError('');
+    setCertificateNames(prev => ({ ...prev, [learner._id]: certificate.recipientName || learner.name }));
+    setCertificateRemarks(prev => ({ ...prev, [learner._id]: certificate.remarks || '' }));
+    setCertificateDialog({ learner, certificate });
+  };
+
+  const saveCertificate = (event) => {
+    event.preventDefault();
+    const { learner, certificate } = certificateDialog;
+    run(async () => {
+      setSavingCertificate(true);
+      setCertificateError('');
+      try {
+        await post(`/admin/users/${learner._id}/certificate`, {
+          recipientName: certificateNames[learner._id],
+          remarks: certificateRemarks[learner._id] ?? ''
+        });
+        const [updatedUsers, updatedCertificates, updatedStats] = await Promise.all([
+          api('/admin/users'), api('/admin/certificates'), api('/admin/stats')
+        ]);
+        setUsers(updatedUsers);
+        setCertificates(updatedCertificates);
+        setStats(updatedStats);
+        certificateDialogRef.current?.close();
+        setNotice(certificate.recipientName ? `Certificate updated for ${learner.name}.` : `Certificate issued for ${learner.name}.`);
+      } catch (error) {
+        setCertificateError(error.message || 'Could not save the certificate');
+        throw error;
+      } finally {
+        setSavingCertificate(false);
+      }
     });
-    const [updatedUsers, updatedCertificates, updatedStats] = await Promise.all([
-      api('/admin/users'), api('/admin/certificates'), api('/admin/stats')
-    ]);
-    setUsers(updatedUsers);
-    setCertificates(updatedCertificates);
-    setStats(updatedStats);
-    setNotice(certificate?.recipientName ? `Certificate updated for ${learner.name}.` : `Certificate issued for ${learner.name}.`);
-  });
+  };
 
   const navTabs = [
     { key: 'overview', label: 'Overview', icon: ShieldCheck },
@@ -534,18 +563,10 @@ export default function AdminDashboard({ run, setNotice }) {
                       {(() => {
                         const learner = users.find(u => u._id === c.user?._id);
                         if (!learner) return <span className="text-muted">Learner unavailable</span>;
-                        const name = certificateNames[learner._id] ?? c.recipientName ?? learner.name;
                         return <div className="admin-certificate-action">
                           <span className="text-muted text-sm">{learner.completed}/22 modules ? {learner.validBugs}/2 reviewed bugs</span>
-                          <input className="form-control" type="text" maxLength={120}
-                            aria-label={`Certificate name for ${learner.name}`} placeholder="Certificate recipient name"
-                            value={name} onChange={event => setCertificateNames(prev => ({ ...prev, [learner._id]: event.target.value }))} />
-                          <textarea className="form-control" rows={2} maxLength={1000}
-                            aria-label={`Certificate remarks for ${learner.name}`} placeholder="Remarks (optional)"
-                            value={certificateRemarks[learner._id] ?? c.remarks ?? ''}
-                            onChange={event => setCertificateRemarks(prev => ({ ...prev, [learner._id]: event.target.value }))} />
-                          <button type="button" className="btn sm primary" disabled={!learner.eligible || !name.trim()}
-                            onClick={() => saveCertificate(learner, c)}>
+                          <button type="button" className="btn sm primary" disabled={!learner.eligible}
+                            onClick={() => openCertificateDialog(learner, c)}>
                             <Award size={14} /> {c.recipientName ? 'Update Certificate' : 'Issue Certificate'}
                           </button>
                           {!learner.eligible && <span className="text-muted text-sm">Requirements incomplete</span>}
@@ -559,6 +580,28 @@ export default function AdminDashboard({ run, setNotice }) {
           </div>
         </div>
       )}
+      <dialog ref={certificateDialogRef} className="certificate-dialog" aria-labelledby="certificate-dialog-title"
+        onClose={() => setCertificateDialog(null)}>
+        {certificateDialog && <form onSubmit={saveCertificate} className="certificate-dialog-form">
+          <h2 id="certificate-dialog-title">{certificateDialog.certificate.recipientName ? 'Update Certificate' : 'Issue Certificate'}</h2>
+          <p className="text-muted text-sm">For {certificateDialog.learner.name}</p>
+          {certificateError && <p className="alert alert-error" role="alert">{certificateError}</p>}
+          <label htmlFor="certificate-recipient">Certificate recipient name</label>
+          <input id="certificate-recipient" className="form-control" type="text" maxLength={120} required autoFocus
+            value={certificateNames[certificateDialog.learner._id] ?? ''}
+            onChange={event => setCertificateNames(prev => ({ ...prev, [certificateDialog.learner._id]: event.target.value }))} />
+          <label htmlFor="certificate-remarks">Remarks (optional)</label>
+          <textarea id="certificate-remarks" className="form-control" rows={3} maxLength={1000}
+            value={certificateRemarks[certificateDialog.learner._id] ?? ''}
+            onChange={event => setCertificateRemarks(prev => ({ ...prev, [certificateDialog.learner._id]: event.target.value }))} />
+          <div className="flex items-center gap-2 flex-wrap">
+            <button type="submit" className="btn primary" disabled={savingCertificate || !(certificateNames[certificateDialog.learner._id] ?? '').trim()}>
+              {savingCertificate ? 'Saving?' : certificateDialog.certificate.recipientName ? 'Update Certificate' : 'Issue Certificate'}
+            </button>
+            <button type="button" className="btn" disabled={savingCertificate} onClick={() => certificateDialogRef.current?.close()}>Cancel</button>
+          </div>
+        </form>}
+      </dialog>
     </main>
   );
 }

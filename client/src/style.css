@@ -2127,6 +2127,13 @@ select.form-control {
 .admin-certificate-action { display: grid; gap: 8px; min-width: 220px; }
 .admin-certificate-action textarea { min-height: 60px; resize: vertical; }
 .admin-certificate-action .btn { justify-self: start; }
+.certificate-dialog { width: min(480px, calc(100% - 32px)); max-height: calc(100% - 32px); padding: 24px; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); background: #101c2d; color: var(--text-main); }
+.certificate-dialog::backdrop { background: rgba(0, 0, 0, 0.7); }
+.certificate-dialog-form { display: grid; gap: 10px; }
+.certificate-dialog-form h2, .certificate-dialog-form p { margin: 0; }
+.certificate-dialog-form label { font-weight: 600; margin-top: 6px; }
+.certificate-dialog-form textarea { resize: vertical; }
+.certificate-dialog-form .flex { margin-top: 10px; }
 .certificate-remarks { margin: 0 0 18px; padding: 14px 16px; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); }
 .certificate-remarks p { margin: 6px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 

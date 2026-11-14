@@ -1,14 +1,14 @@
 import React from 'react';
-import { 
-  BookOpen, 
-  Bug, 
-  FileCheck, 
-  Award, 
-  ArrowRight, 
-  CheckCircle2, 
-  Circle, 
-  Sparkles, 
-  Target 
+import {
+  BookOpen,
+  Bug,
+  FileCheck,
+  Award,
+  ArrowRight,
+  CheckCircle2,
+  Circle,
+  Sparkles,
+  Target
 } from 'lucide-react';
 import StatCard from '../common/StatCard';
 import { post } from '../../services/api';
@@ -163,7 +163,7 @@ export default function HomeTab({ user, dash, modules, bugs, cases, go, run, set
               className="btn primary"
               onClick={() => go('settings')}
             >
-              <Award size={16} /> {certificateApproved ? 'View & Print Certificate' : 'View Certificate Status'}
+              <Award size={16} /> {certificateApproved ? 'View & Download Certificate' : 'View Certificate Status'}
             </button>
           ) : (
             <button
