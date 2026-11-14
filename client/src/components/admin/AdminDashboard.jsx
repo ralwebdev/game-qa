@@ -17,9 +17,14 @@ import StatCard from '../common/StatCard';
 import Badge from '../common/Badge';
 import FormField from '../common/FormField';
 import { api, post, patch } from '../../services/api';
+import { Link, useLocation } from 'react-router-dom';
+
+const adminTabQueries = { learners: 'learner', modules: 'modules', theory: 'theory', bugs: 'bugs', cases: 'cases', feedback: 'feedback', certificates: 'certificates' };
 
 export default function AdminDashboard({ run, setNotice }) {
-  const [tab, setTab] = useState('overview');
+  const location = useLocation();
+  const queryTab = new URLSearchParams(location.search).get('tab');
+  const tab = Object.keys(adminTabQueries).find(key => adminTabQueries[key] === queryTab) || 'overview';
   const [stats, setStats] = useState(null);
   const [users, setUsers] = useState([]);
   const [modules, setModules] = useState([]);
@@ -140,17 +145,15 @@ export default function AdminDashboard({ run, setNotice }) {
       {/* Admin Subnav */}
       <div className="admin-subnav">
         {navTabs.map(({ key, label, icon: Icon }) => (
-          <button
+          <Link
             key={key}
-            type="button"
+            to={key === 'overview' ? '/admin' : `/admin?tab=${adminTabQueries[key]}`}
             className={`admin-tab-btn ${tab === key ? 'active' : ''}`}
-            onClick={() => {
-              setTab(key);
-            }}
+            aria-current={tab === key ? 'page' : undefined}
           >
             <Icon size={15} style={{ verticalAlign: 'middle', marginRight: 6 }} />
             {label}
-          </button>
+          </Link>
         ))}
       </div>
 

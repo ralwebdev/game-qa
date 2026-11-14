@@ -122,7 +122,7 @@ export default function App() {
       {!user ? (
         <AuthScreen onAuth={(authenticatedUser) => {
           setUser(authenticatedUser);
-          if (authenticatedUser.role === 'admin') navigate('/admin', { replace: true });
+          if (authenticatedUser.role === 'admin' && location.pathname !== '/admin') navigate('/admin', { replace: true });
           else if (location.pathname === '/admin') navigate('/', { replace: true });
         }} onError={setError} />
       ) : user.role === 'admin' ? (
