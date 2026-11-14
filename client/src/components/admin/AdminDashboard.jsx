@@ -84,6 +84,7 @@ export default function AdminDashboard({ run, setNotice }) {
     if (!data) return;
     run(async () => {
       await patch(`/admin/${type}/${id}/review`, data);
+      if (type === 'bugs') setUsers(await api('/admin/users'));
       setNotice('Review submitted to learner portfolio');
     });
   };
@@ -96,6 +97,20 @@ export default function AdminDashboard({ run, setNotice }) {
       setNotice('Reply posted to learner feedback');
     });
   };
+
+  const saveCertificate = (learner, certificate) => run(async () => {
+    await post(`/admin/users/${learner._id}/certificate`, {
+      recipientName: certificateNames[learner._id] ?? certificate?.recipientName ?? learner.name,
+      remarks: certificateRemarks[learner._id] ?? certificate?.remarks ?? ''
+    });
+    const [updatedUsers, updatedCertificates, updatedStats] = await Promise.all([
+      api('/admin/users'), api('/admin/certificates'), api('/admin/stats')
+    ]);
+    setUsers(updatedUsers);
+    setCertificates(updatedCertificates);
+    setStats(updatedStats);
+    setNotice(certificate?.recipientName ? `Certificate updated for ${learner.name}.` : `Certificate issued for ${learner.name}.`);
+  });
 
   const navTabs = [
     { key: 'overview', label: 'Overview', icon: ShieldCheck },
@@ -473,7 +488,7 @@ export default function AdminDashboard({ run, setNotice }) {
             <div>
               <h2 style={{ margin: 0 }}>Certificate Requests &amp; Records ({certificates.length})</h2>
               <p className="text-muted text-sm mt-1">
-                Pending requests await a recipient name. Issue certificates from the Learners tab.
+                Issue or update certificates here. Learners need 22 completed modules and 2 reviewed bug reports.
               </p>
             </div>
           </div>
@@ -487,6 +502,7 @@ export default function AdminDashboard({ run, setNotice }) {
                   <th>Learner Email</th>
                   <th>Status</th>
                   <th>Record Created</th>
+                  <th>Certificate Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -510,6 +526,28 @@ export default function AdminDashboard({ run, setNotice }) {
                       <span className="font-mono">
                         {new Date(c.issuedAt).toLocaleDateString()}
                       </span>
+                    </td>
+                    <td>
+                      {(() => {
+                        const learner = users.find(u => u._id === c.user?._id);
+                        if (!learner) return <span className="text-muted">Learner unavailable</span>;
+                        const name = certificateNames[learner._id] ?? c.recipientName ?? learner.name;
+                        return <div className="admin-certificate-action">
+                          <span className="text-muted text-sm">{learner.completed}/22 modules ? {learner.validBugs}/2 reviewed bugs</span>
+                          <input className="form-control" type="text" maxLength={120}
+                            aria-label={`Certificate name for ${learner.name}`} placeholder="Certificate recipient name"
+                            value={name} onChange={event => setCertificateNames(prev => ({ ...prev, [learner._id]: event.target.value }))} />
+                          <textarea className="form-control" rows={2} maxLength={1000}
+                            aria-label={`Certificate remarks for ${learner.name}`} placeholder="Remarks (optional)"
+                            value={certificateRemarks[learner._id] ?? c.remarks ?? ''}
+                            onChange={event => setCertificateRemarks(prev => ({ ...prev, [learner._id]: event.target.value }))} />
+                          <button type="button" className="btn sm primary" disabled={!learner.eligible || !name.trim()}
+                            onClick={() => saveCertificate(learner, c)}>
+                            <Award size={14} /> {c.recipientName ? 'Update Certificate' : 'Issue Certificate'}
+                          </button>
+                          {!learner.eligible && <span className="text-muted text-sm">Requirements incomplete</span>}
+                        </div>;
+                      })()}
                     </td>
                   </tr>
                 ))}
