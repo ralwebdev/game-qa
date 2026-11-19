@@ -2124,6 +2124,12 @@ select.form-control {
 }
 
 
+.learner-filter { position: relative; display: grid; grid-template-columns: 1fr 1fr; width: min(100%, 390px); padding: 4px; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); background: rgba(255, 255, 255, 0.06); }
+.learner-filter::before { content: ''; position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 4px); border-radius: var(--radius-sm); background: linear-gradient(135deg, var(--primary), var(--lime)); transition: transform var(--transition-fast); }
+.learner-filter.eligible::before { transform: translateX(100%); }
+.learner-filter button { position: relative; min-height: 36px; padding: 6px 10px; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--text-main); font-size: 0.8rem; font-weight: 600; }
+.learner-filter button[aria-pressed="true"] { color: #061019; }
+.learner-filter button:focus-visible { outline: 2px solid white; outline-offset: -2px; }
 .admin-certificate-action { display: grid; gap: 8px; min-width: 220px; }
 .admin-certificate-action textarea { min-height: 60px; resize: vertical; }
 .admin-certificate-action .btn { justify-self: start; }

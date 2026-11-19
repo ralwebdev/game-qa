@@ -27,6 +27,7 @@ export default function AdminDashboard({ run, setNotice }) {
   const tab = Object.keys(adminTabQueries).find(key => adminTabQueries[key] === queryTab) || 'overview';
   const [stats, setStats] = useState(null);
   const [users, setUsers] = useState([]);
+  const [eligibleOnly, setEligibleOnly] = useState(false);
   const [modules, setModules] = useState([]);
   const [theory, setTheory] = useState([]);
   const [bugs, setBugs] = useState([]);
@@ -156,6 +157,7 @@ export default function AdminDashboard({ run, setNotice }) {
     { key: 'feedback', label: `Feedback (${feedback.length})`, icon: MessageSquare },
     { key: 'certificates', label: `Certificates (${certificates.length})`, icon: Award }
   ];
+  const visibleUsers = eligibleOnly ? users.filter(user => user.eligible) : users;
 
   return (
     <main className="layout wide">
@@ -212,10 +214,18 @@ export default function AdminDashboard({ run, setNotice }) {
         <div className="card">
           <div className="card-header-row">
             <div>
-              <h2 style={{ margin: 0 }}>Learner Accounts ({users.length})</h2>
+              <h2 style={{ margin: 0 }}>Learner Accounts ({visibleUsers.length})</h2>
               <p className="text-muted text-sm mt-1">
                 Certificates require at least 22 completed modules and 2 bug reports marked reviewed. Administrators set the certificate name and may add remarks.
               </p>
+            </div>
+            <div className={`learner-filter${eligibleOnly ? ' eligible' : ''}`} role="group" aria-label="Filter learners">
+              <button type="button" aria-pressed={!eligibleOnly} onClick={() => setEligibleOnly(false)}>
+                All Participants
+              </button>
+              <button type="button" aria-pressed={eligibleOnly} onClick={() => setEligibleOnly(true)}>
+                Eligible for certificate
+              </button>
             </div>
           </div>
 
@@ -233,7 +243,7 @@ export default function AdminDashboard({ run, setNotice }) {
                 </tr>
               </thead>
               <tbody>
-                {users.map((u) => (
+                {visibleUsers.map((u) => (
                   <tr key={u._id}>
                     <td>
                       <strong>{u.name}</strong>
@@ -300,6 +310,9 @@ export default function AdminDashboard({ run, setNotice }) {
                     </td>
                   </tr>
                 ))}
+                {eligibleOnly && visibleUsers.length === 0 && (
+                  <tr><td colSpan={7}>No learners are currently eligible for a certificate.</td></tr>
+                )}
               </tbody>
             </table>
           </div>
