@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Users, 
-  BookOpen, 
-  Search, 
-  Bug, 
-  FileCheck, 
-  MessageSquare, 
-  Award, 
-  ShieldCheck, 
-  CheckCircle, 
-  XCircle, 
+import {
+  Users,
+  BookOpen,
+  Search,
+  Bug,
+  FileCheck,
+  MessageSquare,
+  Award,
+  ShieldCheck,
+  CheckCircle,
+  XCircle,
   Send,
   Download
 } from 'lucide-react';
@@ -18,6 +18,7 @@ import Badge from '../common/Badge';
 import FormField from '../common/FormField';
 import { api, post, patch } from '../../services/api';
 import { Link, useLocation } from 'react-router-dom';
+import { matchesLearnerFilter } from './learnerFilters';
 
 const adminTabQueries = { learners: 'learner', modules: 'modules', theory: 'theory', bugs: 'bugs', cases: 'cases', feedback: 'feedback', certificates: 'certificates' };
 
@@ -27,7 +28,7 @@ export default function AdminDashboard({ run, setNotice }) {
   const tab = Object.keys(adminTabQueries).find(key => adminTabQueries[key] === queryTab) || 'overview';
   const [stats, setStats] = useState(null);
   const [users, setUsers] = useState([]);
-  const [eligibleOnly, setEligibleOnly] = useState(false);
+  const [learnerFilter, setLearnerFilter] = useState('all');
   const [modules, setModules] = useState([]);
   const [theory, setTheory] = useState([]);
   const [bugs, setBugs] = useState([]);
@@ -157,7 +158,12 @@ export default function AdminDashboard({ run, setNotice }) {
     { key: 'feedback', label: `Feedback (${feedback.length})`, icon: MessageSquare },
     { key: 'certificates', label: `Certificates (${certificates.length})`, icon: Award }
   ];
-  const visibleUsers = eligibleOnly ? users.filter(user => user.eligible) : users;
+  const visibleUsers = users.filter(user => matchesLearnerFilter(user, learnerFilter, modules.length));
+  const progressFilters = [
+    { value: 'over-half', label: 'More than 50% of modules but less than 100% completed' },
+    { value: 'no-bugs', label: 'Modules completed, no bug reports submitted' },
+    { value: 'needs-reviewed-bugs', label: 'Modules completed, fewer than 2 reports reviewed' }
+  ];
 
   return (
     <main className="layout wide">
@@ -219,14 +225,26 @@ export default function AdminDashboard({ run, setNotice }) {
                 Certificates require at least 22 completed modules and 2 bug reports marked reviewed. Administrators set the certificate name and may add remarks.
               </p>
             </div>
-            <div className={`learner-filter${eligibleOnly ? ' eligible' : ''}`} role="group" aria-label="Filter learners">
-              <button type="button" aria-pressed={!eligibleOnly} onClick={() => setEligibleOnly(false)}>
+            <div className={`learner-filter${learnerFilter === 'eligible' ? ' eligible' : learnerFilter !== 'all' ? ' progress-selected' : ''}`} role="group" aria-label="Filter learners">
+              <button type="button" aria-pressed={learnerFilter === 'all'} onClick={() => setLearnerFilter('all')}>
                 All Participants
               </button>
-              <button type="button" aria-pressed={eligibleOnly} onClick={() => setEligibleOnly(true)}>
+              <button type="button" aria-pressed={learnerFilter === 'eligible'} onClick={() => setLearnerFilter('eligible')}>
                 Eligible for certificate
               </button>
             </div>
+          </div>
+
+          <div className="learner-progress-filter">
+            <label htmlFor="learner-progress">Track learner progress</label>
+            <select id="learner-progress" className="form-control" value={progressFilters.some(filter => filter.value === learnerFilter) ? learnerFilter : ''} onChange={event => setLearnerFilter(event.target.value || 'all')}>
+              <option value="">Select a progress filter</option>
+              {progressFilters.map(filter => (
+                <option key={filter.value} value={filter.value}>
+                  {filter.label} ({users.filter(user => matchesLearnerFilter(user, filter.value, modules.length)).length})
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="data-table-container">
@@ -310,8 +328,8 @@ export default function AdminDashboard({ run, setNotice }) {
                     </td>
                   </tr>
                 ))}
-                {eligibleOnly && visibleUsers.length === 0 && (
-                  <tr><td colSpan={7}>No learners are currently eligible for a certificate.</td></tr>
+                {learnerFilter !== 'all' && visibleUsers.length === 0 && (
+                  <tr><td colSpan={7}>No learners match this filter.</td></tr>
                 )}
               </tbody>
             </table>

@@ -38,7 +38,7 @@ api.get('/certificates/download', auth, asyncHandler(async (req, res) => { const
 api.get('/certificates/verify/:code', asyncHandler(async (req, res) => { const cert = await Certificate.findOne({ code: req.params.code }); if (!cert?.recipientName) return res.status(404).json({ message: 'Certificate not found or awaiting administrator approval' }); res.json({ code: cert.code, learner: cert.recipientName, issuedAt: cert.issuedAt, course: 'Scope GT', note: 'Course completion, not an accredited professional certification' }) }));
 api.get('/admin/stats', auth, admin, asyncHandler(async (req, res) => { const [learners, bugs, cases, feedback, certificates] = await Promise.all([User.countDocuments({ role: 'learner' }), Bug.countDocuments(), TestCase.countDocuments(), Feedback.countDocuments(), Certificate.countDocuments({ recipientName: { $exists: true, $nin: ['', null] } })]); res.json({ learners, modules: courseModules.length, bugs, cases, feedback, certificates }) }));
 api.get('/admin/users', auth, admin, asyncHandler(async (req, res) => {
-  const users = await User.find({ role: 'learner' }).sort({ createdAt: -1 }).limit(500).select('-passwordHash').lean();
+  const users = await User.find({ role: 'learner' }).sort({ createdAt: -1 }).select('-passwordHash').lean();
   const userIds = users.map(u => u._id);
   const countByUser = (Model, filter = {}) => Model.aggregate([{ $match: { user: { $in: userIds }, ...filter } }, { $group: { _id: '$user', count: { $sum: 1 } } }]);
   const [certificates, bugCounts, caseCounts, validBugCounts] = await Promise.all([
