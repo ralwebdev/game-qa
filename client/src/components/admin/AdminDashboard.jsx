@@ -160,9 +160,10 @@ export default function AdminDashboard({ run, setNotice }) {
   ];
   const visibleUsers = users.filter(user => matchesLearnerFilter(user, learnerFilter, modules.length));
   const progressFilters = [
-    { value: 'over-half', label: 'More than 50% of modules but less than 100% completed' },
-    { value: 'no-bugs', label: 'Modules completed, no bug reports submitted' },
-    { value: 'needs-reviewed-bugs', label: 'Modules completed, fewer than 2 reports reviewed' }
+    { value: 'over-half', label: 'Over 50% complete', description: 'More than half, but not all modules completed' },
+    { value: 'no-bugs', label: 'No bug reports', description: 'All modules completed, no reports submitted' },
+    { value: 'needs-reviewed-bugs', label: 'Needs reviewed reports', description: 'All modules completed, fewer than 2 reports reviewed' },
+    { value: 'eligible', label: 'Eligible for Certificate', description: 'Meets the certificate requirements' }
   ];
 
   return (
@@ -225,26 +226,22 @@ export default function AdminDashboard({ run, setNotice }) {
                 Certificates require at least 22 completed modules and 2 bug reports marked reviewed. Administrators set the certificate name and may add remarks.
               </p>
             </div>
-            <div className={`learner-filter${learnerFilter === 'eligible' ? ' eligible' : learnerFilter !== 'all' ? ' progress-selected' : ''}`} role="group" aria-label="Filter learners">
-              <button type="button" aria-pressed={learnerFilter === 'all'} onClick={() => setLearnerFilter('all')}>
-                All Participants
-              </button>
-              <button type="button" aria-pressed={learnerFilter === 'eligible'} onClick={() => setLearnerFilter('eligible')}>
-                Eligible for certificate
-              </button>
-            </div>
           </div>
 
           <div className="learner-progress-filter">
-            <label htmlFor="learner-progress">Track learner progress</label>
-            <select id="learner-progress" className="form-control" value={progressFilters.some(filter => filter.value === learnerFilter) ? learnerFilter : ''} onChange={event => setLearnerFilter(event.target.value || 'all')}>
-              <option value="">Select a progress filter</option>
+            <div className="learner-progress-header">
+              <h3>Track learner progress</h3>
+              {learnerFilter !== 'all' && <button type="button" className="btn-link" onClick={() => setLearnerFilter('all')}>Clear filter</button>}
+            </div>
+            <div className="learner-progress-cards" role="group" aria-label="Filter by learner progress">
               {progressFilters.map(filter => (
-                <option key={filter.value} value={filter.value}>
-                  {filter.label} ({users.filter(user => matchesLearnerFilter(user, filter.value, modules.length)).length})
-                </option>
+                <button key={filter.value} type="button" className="learner-progress-card" aria-pressed={learnerFilter === filter.value} onClick={() => setLearnerFilter(filter.value)}>
+                  <span className="learner-progress-count">{users.filter(user => matchesLearnerFilter(user, filter.value, modules.length)).length}</span>
+                  <span className="learner-progress-label">{filter.label}</span>
+                  <span className="learner-progress-description">{filter.description}</span>
+                </button>
               ))}
-            </select>
+            </div>
           </div>
 
           <div className="data-table-container">

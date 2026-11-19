@@ -2124,14 +2124,17 @@ select.form-control {
 }
 
 
-.learner-filter { position: relative; display: grid; grid-template-columns: 1fr 1fr; width: min(100%, 390px); padding: 4px; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); background: rgba(255, 255, 255, 0.06); }
-.learner-filter::before { content: ''; position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 4px); border-radius: var(--radius-sm); background: linear-gradient(135deg, var(--primary), var(--lime)); transition: transform var(--transition-fast); }
-.learner-filter.eligible::before { transform: translateX(100%); }
-.learner-filter.progress-selected::before { opacity: 0; }
-.learner-filter button { position: relative; min-height: 36px; padding: 6px 10px; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--text-main); font-size: 0.8rem; font-weight: 600; }
-.learner-filter button[aria-pressed="true"] { color: #061019; }
-.learner-filter button:focus-visible { outline: 2px solid white; outline-offset: -2px; }
-.learner-progress-filter { display: grid; gap: 6px; max-width: 480px; margin: 0 0 16px; font-size: 0.85rem; font-weight: 600; }
+.learner-progress-filter { margin: 0 0 20px; }
+.learner-progress-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.learner-progress-header h3 { margin: 0; font-size: 0.95rem; }
+.learner-progress-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 10px; }
+.learner-progress-card { display: grid; align-content: start; gap: 4px; min-height: 120px; padding: 14px; text-align: left; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); background: rgba(255, 255, 255, 0.04); color: var(--text-main); transition: border-color var(--transition-fast), background var(--transition-fast); }
+.learner-progress-card:hover { background: rgba(255, 255, 255, 0.08); }
+.learner-progress-card[aria-pressed="true"] { border-color: var(--primary); background: rgba(16, 185, 129, 0.12); }
+.learner-progress-card:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.learner-progress-count { color: var(--primary); font-size: 1.5rem; font-weight: 700; line-height: 1; }
+.learner-progress-label { font-weight: 700; }
+.learner-progress-description { color: var(--text-muted); font-size: 0.8rem; font-weight: 400; }
 .admin-certificate-action { display: grid; gap: 8px; min-width: 220px; }
 .admin-certificate-action textarea { min-height: 60px; resize: vertical; }
 .admin-certificate-action .btn { justify-self: start; }
